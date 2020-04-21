@@ -1,0 +1,87 @@
+\documentclass{article}
+\usepackage{amsmath,amssymb}
+\begin{document}
+The Chebyshev points for interpolating polynomials of maximum degree 
+$n$:
+\begin{align}
+	x_j = \cos(j \pi/n), \; j=0,\cdots,n
+\end{align}
+The unique polynomial interpolant with values $\left\{u_j\right\}$ at the 
+ Chebyshev points $\left\{x_j\right\}$:
+\begin{align}
+	p(x) = \sum_{j=0}^n u_j \prod_{k=0,k\neq j}^n  
+	\dfrac{x-x_k}{x_j-x_k}
+\end{align}
+Define $q_j(x) = \prod_{i=0,i\neq j}^n (x - x_i)/(x_j - x_i) $, so 
+that $p(x) = \sum_{j=0}^n u_j q_j(x)$. The derivative 
+of $q_j$ at the Chebyshev points:
+\begin{align}
+	\label{eqn:DijRaw}
+	q_j'(x) = \begin{cases} 
+	\sum_{k=0,k\neq j}^n 
+	\dfrac{1}{x_j - x_k} & x = x_j \\ 
+	\dfrac{\prod_{k=0,k\neq j,i}^n (x_i - x_k)}
+	{\prod_{k=0,k\neq j}^n (x_j - x_k)} & x = x_i, i \neq j 
+	\end{cases}
+\end{align}
+The derivative of $p$, which is used to approximate the derivative of 
+the function $u$, at the Chebyshev points:
+\begin{align}
+	p'(x_k) = \sum_{j=0}^n u_j q_j'(x_k).
+\end{align}
+Define the chebyshev differentiation matrix $D \in \mathbb{R}^{(n+1)\times (n+1)}$ as $D[i,j] = q_j'(x_i)$ so that 
+$p'(x_i) = D[i,\cdot]\cdot U,$ where $U = \left\{u_j\right\}$. Using the following relationships between $x_i$, we can 
+justify the simple program to calculate $D$ in Trefethen pg. 54. 
+\begin{enumerate}
+\item Since $x_i = - x_{n-i}$,
+\begin{align}
+\label{eqn:firstRelation}
+\prod_{k=0,k\neq j}^n (x_j - x_k) = 
+(-1)^n\prod_{k=0,k\neq j}^n (x_{n-j} - x_{n-k}) 
+= (-1)^n \prod_{k=0,k\neq n-j}^n (x_{n-j} - x_k).
+\end{align}
+Similarly,
+\begin{align}
+\label{eqn:secondRelation}
+\prod_{k=0,k\neq j,i}^n (x_j - x_k) = 
+(-1)^{n-1}\prod_{k=0,k\neq n-j,n-i}^n (x_{n-j} - x_k).
+\end{align}
+Using relationships \ref{eqn:firstRelation} and 
+\ref{eqn:secondRelation},
+\begin{align}
+\label{eqn:combinedRelation}
+D[i,j] = \dfrac{\prod_{k=0,k\neq j,i}^n (x_i - x_k)}
+{\prod_{k=0,k\neq j}^n (x_j - x_k)}
+= -\dfrac{\prod_{k=0,k\neq n-j,n-i}^n (x_{n-i} - x_k)}
+{\prod_{k=0,k\neq n-j}^n (x_{n-j} - x_k)} = - D[n-i,n-j].
+\end{align}
+\item Sums: $\sum_{k=0}^n x_k = 0$. So, $\sum_{k=0}^n (x_k - x_i) 
+= n x_i$. 
+
+\item Products: $a_j := 
+	\prod_{k=0,k\neq j}^n (x_j - x_k)$. A result, which 
+		we numerically verified, is that $a_j = (-1)^j c$, for some 
+		constant $c > 0$ when $j \neq 0,n$. When 
+		$j = 0$ or $j = n$, $a_j = (-1)^j 2c$. We use this to simplify Eq. \ref{eqn:DijRaw}:
+\begin{align}
+	D[i,j] &= 
+	\dfrac{\prod_{k=0,k\neq j,i}^n (x_i - x_k)}{\prod_{k=0,k\neq j}^n (x_j - x_k)}\; \quad 
+	x = x_i, i \neq j  \\
+	&= \dfrac{\prod_{k=0,k\neq j}^n (x_i - x_k)}
+	{(x_i - x_j)\prod_{k=0,k\neq j}^n (x_j - x_k)}, 
+	\; \; i \neq j\\ 
+	&= \begin{cases} 
+	\dfrac{2 (-1)^{i+j}}{x_i - x_j}, & j = 0, n \\
+		\dfrac{(-1)^{i+j}}{x_i - x_j}, & o.w. 
+	\end{cases}
+\end{align}
+\item Using the previous fact on the products, we 
+	can simplify the diagonal elements,
+\begin{align}
+	D[j,j] &= \sum_{k=0,k\neq j}^n 
+	\dfrac{1}{x_j - x_k} =  
+	%\sum_{k=0,k\neq j}^n 
+	%\dfrac{ }{(-1)^j c}
+\end{align}
+\end{enumerate}
+\end{document}
