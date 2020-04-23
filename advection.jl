@@ -16,15 +16,15 @@ c = dt*a/dx
 A .= lmul!(c,A)
 A .= I(m) .- A  
 v1 = copy(v0)
-Nc = 20
+Nc = 10
 D = cheb_diff_matrix(Nc)
-dtc = 0.1/Nc/a
+dtc = 0.01/Nc/a
 D .= I(Nc+1) - a.*dtc.*D
 xc = cheb_pts(Nc)
 p0 = sin.(pi*xc)
 p1 = copy(p0)
 fig, ax = subplots(1,2)
-for n = 1:1000
+for n = 1:100
 	ax[1].plot(x,v1)
 	ax[2].plot(xc,p1)
 	pause(0.1)
