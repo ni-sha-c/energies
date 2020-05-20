@@ -1,6 +1,6 @@
+dt = 0.005
 function lorenz63(u0, s, n)
 	sigma, rho, beta = s
-	dt = 0.005
 	d, m = size(u0)
 	n = n+1
 	u_trj = zeros((m,d,n))
@@ -23,7 +23,6 @@ function dlorenz63(u, s)
 	y = view(u,:,2)
 	z = view(u,:,3)
 	du = zeros(n, d, d)
-	dt = 0.005
 	@. du[:,1,1] = 1.0 - dt*sigma
 	@. du[:,1,2] = dt*sigma
 	@. du[:,2,1] = dt*(rho - z) 
@@ -34,6 +33,10 @@ function dlorenz63(u, s)
 	@. du[:,3,3] = 1.0 - dt*beta
 	return du
 end
+function perturbation(u,s)
+	n, d = size(u)
+	# the perturbation in row i in T_{u_(i+1)} M
+	return [zeros(n) dt*u[:,1] zeros(n)]
 #=
     def objective(self, fields, parameter):
         return fields[-1]
