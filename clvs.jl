@@ -1,3 +1,4 @@
+using LinearAlgebra
 """
     Compute Lyapunov Exponents and Covariant 
     Lyapunov vectors.
