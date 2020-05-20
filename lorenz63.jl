@@ -23,6 +23,7 @@ function dlorenz63(u, s)
 	y = view(u,:,2)
 	z = view(u,:,3)
 	du = zeros(n, d, d)
+	dt = 0.005
 	@. du[:,1,1] = 1.0 - dt*sigma
 	@. du[:,1,2] = dt*sigma
 	@. du[:,2,1] = dt*(rho - z) 
