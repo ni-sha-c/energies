@@ -38,6 +38,12 @@ function perturbation(u,s)
 	# the perturbation in row i in T_{u_(i+1)} M
 	return [zeros(1,n); dt*u[:,1]'; zeros(1,n)]
 end
+function vectorField(u,s)
+	n, d = size(u)
+	u = u'
+	x, y, z = u[1,:], u[2,:], u[3,:]
+	return [sigma.*(y - x);  x.*(rho .- z) - y; 
+			x.*y - beta.*z]
 #=
     def objective(self, fields, parameter):
         return fields[-1]
