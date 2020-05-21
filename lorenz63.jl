@@ -36,7 +36,8 @@ end
 function perturbation(u,s)
 	n, d = size(u)
 	# the perturbation in row i in T_{u_(i+1)} M
-	return [zeros(n) dt*u[:,1] zeros(n)]
+	return [zeros(1,n); dt*u[:,1]'; zeros(1,n)]
+end
 #=
     def objective(self, fields, parameter):
         return fields[-1]
