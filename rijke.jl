@@ -53,7 +53,6 @@ function Rijke(u0::Array{Float64,1},
 	end
 	return u0, ufMean
 end
-
 function Rijke_ODE(u0::Array{Float64,1}, 
 			   s::Array{Float64,1}=[7.0, 0.2],
 			   n::Int64=1)
@@ -61,7 +60,6 @@ function Rijke_ODE(u0::Array{Float64,1},
 	sol = concrete_solve(prob, Tsit5())
 	return sol
 end
-
 function f!(uDot, u, s, t)
 	eta = view(u, 1:Ng)
 	mu = view(u, Ng+1:2*Ng)
@@ -73,6 +71,15 @@ function f!(uDot, u, s, t)
 						sjpixf
 	uDot[tNg:N] .= -2.0/tau.*(D*[v; 
 					dot(eta, cjpixf)])[1:end-1]
+end
+function perturbation(u,s)
+	n, d = size(u)
+	beta, tau = s
+	v1 = u[:,2*Ng + 1] 
+	dheat = qfun.(v1)
+	return reshape([zeros(Ng*n); 
+					kron(-2.0.*ones(n).*dheat, sjpixf);
+					zeros(Nc*n)], d, n)
 end
 function dRijke(u::Array{Float64,2}, s::Array{Float64,1},
 			   eps::Float64)
@@ -89,8 +96,8 @@ function dRijke(u::Array{Float64,2}, s::Array{Float64,1},
 			u_p .= u0_i .+ eps*v0
 			u_m .= u0_i .- eps*v0
 
-			dTu[:,j,i] = (Rijke(u_p, s, 1) - 
-						  Rijke(u_m, s, 1))/(2*eps)
+			dTu[:,j,i] = (Rijke(u_p, s, 1)[1] - 
+						 Rijke(u_m, s, 1)[1])/(2*eps)
 		end
 	end
 	return dTu
