@@ -40,10 +40,11 @@ function perturbation(u,s)
 end
 function vectorField(u,s)
 	n, d = size(u)
+	sigma, rho, beta = s
 	u = u'
 	x, y, z = u[1,:], u[2,:], u[3,:]
-	return [sigma.*(y - x);  x.*(rho .- z) - y; 
-			x.*y - beta.*z]
+	return [sigma.*(y - x)  x.*(rho .- z) - y  x.*y - beta.*z]'
+end
 #=
     def objective(self, fields, parameter):
         return fields[-1]
