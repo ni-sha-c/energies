@@ -4,8 +4,8 @@ function lss(u_trj, du_trj, X, f, J, dJ, s, d_u)
     R = zeros(d_u,d_u,n)
     Q = zeros(d,d_u,n)
 	v = zeros(d,1,n) #assume one parameter
-	v[:,1,1] = rand(3)
-	A = qr!(Q[:,:,1])
+	v[:,1,1] = rand(d)
+	A = qr!(rand(d,d_u))
     Q[:,:,1] = Array(A.Q)
     R[:,:,1] = A.R
 	

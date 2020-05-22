@@ -37,7 +37,7 @@ function test_les()
 	@assert all(isapprox.(les/0.005, [0.91, 0., 
 		-14.572], rtol=1.e-1)) == 1
 end
-function test_lss()
+#function test_lss()
 	s = [10., 28., 8/3]
     m = 1
     n = 2000
@@ -49,8 +49,9 @@ function test_lss()
 	dJ = zeros(d,n+1)
 	dJ[3,:] .= 1.
 	include("lss.jl")
-	n_samples = 10
+	n_samples = 1
 	dJds = zeros(n_samples)
+	vsh = zeros(d,n+1)
 	for i=1:n_samples
 		println("Starting LSS, sample ", i)
 		u_trj = lorenz63(u_init, s, n)[:,:,1]
@@ -59,11 +60,12 @@ function test_lss()
     	X = perturbation(u_trj,s) #ith col in T_{u_{i+1}} M
 		f = vectorField(u_trj,s)	
 		J = u_trj[:,3]
-		vsh, dJds[i] = lss(u_trj, du_trj, X, f, J, dJ, 
+		y, dJds[i] = lss(u_trj, du_trj, X, f, J, dJ, 
 						  s, d_u)
-
+		println(size(y))
+		global vsh .= y
 		global u_init .= reshape(u_trj[end,:],3,1)
 	end
 	@test isapprox((sum(dJds)/n_samples),1.0,rtol=0.1)  
 	return vsh, dJds
-end
+#end
