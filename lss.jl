@@ -1,3 +1,4 @@
+include("lsssolve.jl")
 function lss(u_trj, du_trj, X, f, J, dJ, s, d_u)
 	n, d = size(u_trj)
 	lyap_exps = zeros(d_u)
@@ -13,7 +14,7 @@ function lss(u_trj, du_trj, X, f, J, dJ, s, d_u)
 	ff = zeros(n)
 	[ff[i] = norm(f[:,i])^2.0 for i = 1:n]
     for i=2:n
-		v[:,:,i] = du_trj[:,:,i-1]*v[:,:,i-1] + 
+	    v[:,:,i] = du_trj[:,:,i-1]*v[:,:,i-1] + 
 					X[:,i-1]
 		Q[:,:,i] = du_trj[:,:,i-1]*Q[:,:,i-1]
 		[Q[:,j,i] = Q[:,j,i-1] - (f[:,i]'*
@@ -30,8 +31,7 @@ function lss(u_trj, du_trj, X, f, J, dJ, s, d_u)
 		lyap_exps .+= log.(abs.(diag(R[:,:,i])))./n
     end
 	b = reshape(collect(b),d_u, n)
-	println("Solving the least squares problem...")
-	include("lsssolve.jl")
+	println("Solving the least squares problem... ")
 	a = lsssolve(R,b)
 ~
 	# shadowing direction

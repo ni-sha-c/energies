@@ -1,6 +1,6 @@
 dt = 0.005
 function lorenz63(u0, s, n)
-	sigma, rho, beta, eps = s
+	sigma, rho, beta = s
 	d, m = size(u0)
 	n = n+1
 	u_trj = zeros((m,d,n))
@@ -11,13 +11,13 @@ function lorenz63(u0, s, n)
 		z = u_trj[:,3,i-1]
 	
 		u_trj[:,1,i] = x + dt*(sigma.*(y - x))
-		u_trj[:,2,i] = y + dt*(x.*(rho .- (z-eps)) - y)
-		u_trj[:,3,i] = z + dt*(x.*y - beta.*(z-eps))
+		u_trj[:,2,i] = y + dt*(x.*(rho .- z) - y)
+		u_trj[:,3,i] = z + dt*(x.*y - beta.*z)
 	end 
 	return permutedims(u_trj,[3,2,1])
 end
 function dlorenz63(u, s)
-	sigma, rho, beta, eps = s
+	sigma, rho, beta = s
 	n, d = size(u)
 	x = view(u,:,1)
 	y = view(u,:,2)
@@ -25,7 +25,7 @@ function dlorenz63(u, s)
 	du = zeros(n, d, d)
 	@. du[:,1,1] = 1.0 - dt*sigma
 	@. du[:,1,2] = dt*sigma
-	@. du[:,2,1] = dt*(rho - z .+ eps) 
+	@. du[:,2,1] = dt*(rho - z) 
 	@. du[:,2,2] = 1.0 - dt
 	@. du[:,2,3] = -dt*x 
 	@. du[:,3,1] = dt*y

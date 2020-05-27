@@ -60,7 +60,8 @@ end
     	X = perturbation(u_trj,s) #ith col in T_{u_{i+1}} M
 		f = vectorField(u_trj,s)	
 		J = u_trj[:,3]
-		y, dJds[i] = lss(u_trj, du_trj, X, f, J, dJ, 
+		y, dJds[i] = lss(u_trj,  
+						du_trj, X, f, J, dJ, 
 						  s, d_u)
 		println(size(y))
 		global vsh .= y
