@@ -1,5 +1,6 @@
 include("solenoid.jl")
 include("clvs.jl")
+include("lss.jl")
 using Test
 function test_dsolenoid()
 	s = [1.,4]
@@ -49,35 +50,49 @@ function test_perturbation()
 	1
 end
 function test_lss()
-	s = [1.,4.]
+	s = [3.,4.]
     m = 1
-    n = 200
+    n = 1000
     n_runup = 1000
-    u0 = rand(3,m)
-    u_init = solenoid(u0, s, n)[end,:,:]
     d = 3
     d_u = 1
-	dJ = zeros(d,n+1)
-	dJ[3,:] .= 1.
-	include("lss.jl")
-	n_samples = 1
+
+	u0 = rand(m,d)
+	u_init = transpose(solenoid(u0, s, n_runup
+								)[end,:,:])
+   	n_samples = 10
 	dJds = zeros(n_samples)
 	vsh = zeros(d,n+1)
+	f = zeros(d,n+1)	
+	u = zeros(n+1,d)	
 	for i=1:n_samples
 		println("Starting LSS, sample ", i)
-		u_trj = lorenz63(u_init, s, n)[:,:,1]
-		du_trj = dlorenz63(u_trj, s)
-		du_trj = permutedims(du_trj,[2,3,1])
+		u_trj = solenoid(u_init, s, n)[:,:,1]
+		du_trj = dsolenoid(u_trj, s)
 		X = perturbation(u_trj,s) #ith col in T_{u_{i+1}} M
-		f = vectorField(u_trj,s)	
-		J = u_trj[:,3]
-		y, dJds[i] = lss(u_trj,  
-						du_trj, X, f, J, dJ, 
-						  s, d_u)
-		println(size(y))
-		vsh .= y
-		u_init .= reshape(u_trj[end,:],3,1)
+		J = objective(u_trj,s)
+		dJ = dobjective(u_trj, s) 
+		v, dJds[i] = lss(u_trj, du_trj, X, f, J, dJ, s, d_u)
+		vsh .= v
+		u .= u_trj
+		u_init .= reshape(u_trj[end,:],1,3)
+		println(dJds[i])	
 	end
+	# check with analytical shadowing direction
+	# which is [r,0,0]
+	n_spinup = 100
+	u = u[n_spinup+1:end,:]
+	vsh = vsh[:, n_spinup+1:end]
+	n = n - n_spinup
+	x, y, z = view(u,:,1), view(u,:,2),
+				  view(u,:,3)
+	r = sqrt.(x.*x .+ y.*y .+ z.*z)
+	t_dir = [-y./r  x./r  zeros(n+1)]'
+	r_dir = [x./r   y./r  zeros(n+1)]'
+	prj_theta = [dot(t_dir[:,i], vsh[:,i]) for i=1:n] 
+	prj_z = [dot([0,0,1.], vsh[:,i]) for i=1:n] 
+	#@test all(isapprox.(prj_theta, 0., atol=0.01)) == 1
+	#@test all(isapprox.(prj_z, 0., atol=0.01)) == 1
 	@test isapprox((sum(dJds)/n_samples),1.0,rtol=0.1)  
 	return vsh, dJds
 end

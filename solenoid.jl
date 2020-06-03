@@ -101,7 +101,7 @@ function objective(u,s)
 	u = u'
 	J = zeros(n)
 	[J[i] = sqrt(u[1,i]*u[1,i] + 
-				 u[2,i]*u[2*i] + 
+				 u[2,i]*u[2,i] + 
 				 u[3,i]*u[3,i]) for i=1:n]
 	return J
 end
