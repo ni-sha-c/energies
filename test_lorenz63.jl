@@ -1,5 +1,6 @@
 include("lorenz63.jl")
 include("clvs.jl")
+include("lss.jl")
 using Test
 function test_dlorenz63()
 	s = [10., 28., 8/3]
@@ -19,28 +20,27 @@ function test_dlorenz63()
 						s, 1)[2,:,:] - 
 				lorenz63(u_trj .- eps.*[0; 0.; 1.], 
 						s, 1)[2,:,:])./(2*eps)
-	du_fd = reshape(collect([du_x' du_y' du_z']), 
-						m, 3, 3)
+	du_fd = reshape(collect([du_x; du_y; du_z]), 
+						3, 3, m)
 	du = dlorenz63(u_trj', s)
-	@assert all(isapprox.(du_fd, du)) == 1
+	@test all(isapprox.(du_fd - du, 0.,atol=1.e-8)) == 1
 end
 function test_les()
 	s = [10., 28., 8/3]
 	m = 1
-	n = 25000
+	n = 20000
 	u0 = rand(3,m)
 	u_trj = lorenz63(u0, s, n)[:,:,1]
 	du_trj = dlorenz63(u_trj, s)
-	du_trj = permutedims(du_trj,[2,3,1])
 	les, clv_trj = clvs(du_trj,3)
 	println(les/0.005)
-	@assert all(isapprox.(les/0.005, [0.91, 0., 
+	@test all(isapprox.(les/0.005, [0.91, 0., 
 		-14.572], rtol=1.e-1)) == 1
 end
-#function test_lss()
+function test_lss()
 	s = [10., 28., 8/3]
     m = 1
-    n = 2000
+    n = 5000
     n_runup = 5000
     u0 = rand(3,m)
     u_init = lorenz63(u0, s, n)[end,:,:]
@@ -48,8 +48,7 @@ end
     d_u = 1
 	dJ = zeros(d,n+1)
 	dJ[3,:] .= 1.
-	include("lss.jl")
-	n_samples = 1
+	n_samples = 10
 	dJds = zeros(n_samples)
 	vsh = zeros(d,n+1)
 	for i=1:n_samples
@@ -63,10 +62,10 @@ end
 		y, dJds[i] = lss(u_trj,  
 						du_trj, X, f, J, dJ, 
 						  s, d_u)
-		println(size(y))
-		global vsh .= y
-		global u_init .= reshape(u_trj[end,:],3,1)
+		println(dJds[i])
+		vsh .= y
+		u_init .= reshape(u_trj[end,:],3,1)
 	end
 	@test isapprox((sum(dJds)/n_samples),1.0,rtol=0.1)  
 	return vsh, dJds
-#end
+end

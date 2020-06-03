@@ -31,7 +31,8 @@ function dlorenz63(u, s)
 	@. du[:,3,1] = dt*y
 	@. du[:,3,2] = dt*x
 	@. du[:,3,3] = 1.0 - dt*beta
-	return du
+	return reshape([du[:,:,1]'; du[:,:,2]'; 
+					du[:,:,3]'], d, d, n)
 end
 function perturbation(u,s)
 	n, d = size(u)

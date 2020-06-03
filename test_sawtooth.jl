@@ -37,7 +37,7 @@ function test_lss()
 	dJ = ones(d,n+1)
 	n_samples = 10
 	dJds = zeros(n_samples)
-	#vsh = zeros(d,n+1)
+	vsh = zeros(d,n+1)
 	
 	for i=1:n_samples
 		println("Starting LSS, sample ", i)
@@ -47,11 +47,11 @@ function test_lss()
 		f = zeros(1,n+1)	
 		J = u_trj
 		u_trj = reshape(u_trj, n+1, d)
-		vsh, dJds[i] = lss(u_trj,  
+		y, dJds[i] = lss(u_trj,  
 						du_trj, X, f, J, dJ, 
 						  s, d_u)
 		println(dJds[i])
-		#vsh .= y
+		vsh .= y
 		u0 .= u_trj[end,:]
 	end
 	println("Sensitivities are : ", dJds)
