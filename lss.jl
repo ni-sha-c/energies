@@ -1,4 +1,36 @@
 include("lsssolve.jl")
+"""
+Implements the NILSS algorithm due to Ni and Wang JCP 2017
+Below, u -> F(u) is the time-1 primal map.
+Inputs:
+	u_trj: nxd n-length timeseries of primal solutions
+	du_trj: dxdxn n-length timeseries of Jacobian matrices
+			along u_trj
+	X: dxn n-length timeseries of perturbation vectors. 
+			X[:,i] = dF/ds(u_trj[i,:]) which is in the 
+			tangent space of u_trj[i+1,:].
+	f: dxn n-length timeseries of the neutral CLV. By 
+			assumption, the only neutral CLV is the RHS of 
+			the primal ode: du/dt = f(u,s). 
+			In case of maps, u_n = F(u_{n+1}), f is zeros.
+	J: n-length timeseries of the scalar function J(u)
+			evaluated along u_trj
+	dJ: dxn n-length timeseries of DJ(u) evaluated along 
+			u_trj
+	s: array of parameters
+	d_u: integer dimension of the unstable subspace. You can 		set a guess value to obtain correct sensitivities 
+		as long as the guess value is greater than or equal
+		to the true d_u.
+Outputs:
+	vsh: dxn n-length timeseries of shadowing tangent 
+		vectors that are bounded solutions of the 
+		conventional tangent equation: 
+			v[:,i+1] = du_trj[:,i]*v[:,i] + X[:,i]
+	
+	dJds: scalar-valued sensitivity of interest:
+		d/ds sum(J) ≈ d/ds <J, mu>, where mu is 
+		the SRB measure.
+"""
 function lss(u_trj, du_trj, X, f, J, dJ, s, d_u)
 	n, d = size(u_trj)
 	lyap_exps = zeros(d_u)
