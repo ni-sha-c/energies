@@ -1,13 +1,11 @@
 include("solenoid.jl")
 include("clvs.jl")
 using Test
-#function test_dsolenoid()
+function test_dsolenoid()
 	s = [1.,4]
 	m = 10
-	u0 = rand(m,3)
-	u_trj = solenoid(u0, s, 1)[2,:,:]
-	u_trj = u_trj'
-	eps = 1.e-4
+	u_trj = rand(m,3)
+	eps = 1.e-5
 	du_x = (solenoid(u_trj .+ eps.*[1 0. 0.],
 						s, 1)[2,:,:] - 
 				solenoid(u_trj .- eps.*[1 0. 0.], 
@@ -23,8 +21,8 @@ using Test
 	du_fd = reshape(collect([du_x; du_y; du_z]), 
 						3, 3, m)
 	du = dsolenoid(u_trj, s)
-	@assert all(isapprox.(du_fd, du)) == 1
-#end
+	@assert all(isapprox.(du_fd, du, rtol=1.e-2)) == 1
+end
 function test_les()
 	s = [10., 28., 8/3]
 	m = 1
@@ -65,8 +63,8 @@ function test_lss()
 						du_trj, X, f, J, dJ, 
 						  s, d_u)
 		println(size(y))
-		global vsh .= y
-		global u_init .= reshape(u_trj[end,:],3,1)
+		vsh .= y
+		u_init .= reshape(u_trj[end,:],3,1)
 	end
 	@test isapprox((sum(dJds)/n_samples),1.0,rtol=0.1)  
 	return vsh, dJds

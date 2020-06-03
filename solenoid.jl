@@ -54,13 +54,13 @@ function dsolenoid(u, s)
 
 	dT3_dx = [dT3_dT2r zeros(n)].*
 			 [dT2r_dx dT2r_dx zeros(n)] .+ 
-			 [dT3_dT2t dT2z_dT1t].*
-			 [dT2t_dx dT2t_dx dT1_dx[:,2]] .+ 
+			 [dT3_dT2t zeros(n)].*
+			 [dT2t_dx dT2t_dx zeros(n)] .+ 
 			 [zeros(n) zeros(n) dT2z_dx]
 	dT3_dy = [dT3_dT2r zeros(n)].*
 			 [dT2r_dy dT2r_dy zeros(n)] .+ 
-			 [dT3_dT2t dT2z_dT1t].*
-			 [dT2t_dy dT2t_dy dT1_dy[:,2]] .+ 
+			 [dT3_dT2t zeros(n)].*
+			 [dT2t_dy dT2t_dy zeros(n)] .+ 
 			 [zeros(n) zeros(n) dT2z_dy]
 	dT3_dz = [zeros(n) zeros(n) dT2z_dz]
 			 
