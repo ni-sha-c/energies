@@ -69,8 +69,16 @@ function dsolenoid(u, s)
 end
 function perturbation(u,s)
 	n, d = size(u)
+	s0, s1 = s
 	# the perturbation in row i in T_{u_(i+1)} M
-	return [zeros(1,n); dt*u[:,1]'; zeros(1,n)]
+	x, y, z = view(u,:,1), view(u,:,2), view(u,:,3)
+	r, t = cart_to_cyl(x,y)
+	r1, t1 = s0 .+ (r .- s0)/s1 + cos.(t)/2,
+			 2*t
+	# dTu_dr1 must be dim 2xn		 
+	dTu_dr1 = transpose(dcyl_to_cart(r1, t1)[:,:,1]) 
+	dr1_ds = 1.0 - 1/s1
+	return [dr1_ds*dTu_dr1; zeros(1,n)]
 end
 function cart_to_cyl(x, y)
 	return [sqrt.(x.*x .+ y.*y), 

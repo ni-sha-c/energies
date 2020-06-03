@@ -36,6 +36,18 @@ function test_les()
 	@assert all(isapprox.(les/0.005, [0.91, 0., 
 		-14.572], rtol=1.e-1)) == 1
 end
+function test_perturbation()
+	s = [1.,4.]
+	n = 10
+	eps = 1.e-4
+	u = rand(n,3)
+	dFds_fd = (solenoid(u, s .+ eps.*[1,0], 1)[2,:,:] - 
+			   solenoid(u, s .- eps.*[1,0], 1)[2,:,:])/
+			   (2*eps)
+	dFds = perturbation(u, s)
+	@test all(isapprox.(dFds_fd - dFds, 0., atol=1.e-8)) == 
+	1
+end
 function test_lss()
 	s = [10., 28., 8/3]
     m = 1
@@ -55,8 +67,8 @@ function test_lss()
 		println("Starting LSS, sample ", i)
 		u_trj = lorenz63(u_init, s, n)[:,:,1]
 		du_trj = dlorenz63(u_trj, s)
-    	du_trj = permutedims(du_trj,[2,3,1])
-    	X = perturbation(u_trj,s) #ith col in T_{u_{i+1}} M
+		du_trj = permutedims(du_trj,[2,3,1])
+		X = perturbation(u_trj,s) #ith col in T_{u_{i+1}} M
 		f = vectorField(u_trj,s)	
 		J = u_trj[:,3]
 		y, dJds[i] = lss(u_trj,  
