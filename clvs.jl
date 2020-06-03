@@ -3,6 +3,12 @@ using LinearAlgebra
     Compute Lyapunov Exponents and Covariant 
     Lyapunov vectors.
     Reference: Ginelli 2013
+	Inputs:
+		DTu: dxdxm m-length timeseries of jacobian matrices
+		du: tangent subspace dimension that the computed CLVs must span.
+	Outputs:
+		lyap_exps: the first du Lyapunov exponents
+		Q: dxduxm m-length timeseries of the first du CLVs
 
 """
 function clvs(DTu::Array{Float64,3},du::Int64)

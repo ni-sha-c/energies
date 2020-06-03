@@ -14,8 +14,8 @@ function dsawtooth(u, s=0)
 	return 2.0 .+ s*cos.(2*pi*u/4)*2*pi/4
 end
 function perturbation(u,s)
-	n, d = size(u)
+	n = size(u)[1]
 	# the perturbation in row i in T_{u_(i+1)} M
-	return [zeros(1,n); dt*u[:,1]'; zeros(1,n)]
+	return sin.(2*pi*u/4) .% 1
 end
 
