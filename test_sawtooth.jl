@@ -27,32 +27,34 @@ function test_les()
 	@assert all(isapprox.(les, log(2), 
 						  rtol=1.e-1)) == 1
 end
-#function test_lss()
+function test_lss()
 	s = 0.01
     m = 1
-    n = 2000
+    n = 5000
     u0 = rand(m)
 	d = 1
     d_u = 1
 	dJ = ones(d,n+1)
-	n_samples = 1
+	n_samples = 10
 	dJds = zeros(n_samples)
-	vsh = zeros(d,n)
+	#vsh = zeros(d,n+1)
+	
 	for i=1:n_samples
 		println("Starting LSS, sample ", i)
 		u_trj = sawtooth(u0, s, n)[:,1]
 		du_trj = reshape(dsawtooth(u_trj, s),d,d,n+1)
-    	X = perturbation(u_trj,s) 
-		f = zeros(n+1)	
+		X = reshape(perturbation(u_trj,s),d,n+1) 
+		f = zeros(1,n+1)	
 		J = u_trj
 		u_trj = reshape(u_trj, n+1, d)
-		y, dJds[i] = lss(u_trj,  
+		vsh, dJds[i] = lss(u_trj,  
 						du_trj, X, f, J, dJ, 
 						  s, d_u)
-		println(size(y))
-		vsh .= y
-		u_init .= reshape(u_trj[end,:],3,1)
+		println(dJds[i])
+		#vsh .= y
+		u0 .= u_trj[end,:]
 	end
-#	@test isapprox((sum(dJds)/n_samples),1.0,rtol=0.1)  
-#	return vsh, dJds
-#end
+	println("Sensitivities are : ", dJds)
+	@test isapprox((sum(dJds)/n_samples),-0.61,rtol=0.1)  
+	return vsh, dJds
+end

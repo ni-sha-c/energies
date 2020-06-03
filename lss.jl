@@ -37,19 +37,24 @@ function lss(u_trj, du_trj, X, f, J, dJ, s, d_u)
     R = zeros(d_u,d_u,n)
     Q = zeros(d,d_u,n)
 	v = zeros(d,1,n) #assume one parameter
-	v[:,1,1] = rand(d)
+	v[:,1,1] = zeros(d)
 	A = qr!(rand(d,d_u))
     Q[:,:,1] = Array(A.Q)
     R[:,:,1] = A.R
 	
 	b = zeros(d_u,1,n) #1 is the # parameters
 	ff = zeros(n)
-	[ff[i] = norm(f[:,i])^2.0 for i = 1:n]
-    for i=2:n
+	if all(isapprox.(f,0.)) 
+		ff = ones(n)
+	else
+		[ff[i] = sum(x -> x^2, f[:,i]) for i = 1:n]
+	end
+   	
+	for i=2:n
 	    v[:,:,i] = du_trj[:,:,i-1]*v[:,:,i-1] + 
 					X[:,i-1]
 		Q[:,:,i] = du_trj[:,:,i-1]*Q[:,:,i-1]
-		[Q[:,j,i] = Q[:,j,i-1] - (f[:,i]'*
+		[Q[:,j,i] = Q[:,j,i] - (f[:,i]'*
 						Q[:,j,i])*f[:,i]/
 		 				ff[i] for j=1:d_u]
 		A = qr!(Q[:,:,i])
@@ -62,6 +67,8 @@ function lss(u_trj, du_trj, X, f, J, dJ, s, d_u)
 					(ff[i]).*f[:,i])
 		lyap_exps .+= log.(abs.(diag(R[:,:,i])))./n
     end
+	
+	
 	b = reshape(collect(b),d_u, n)
 	println("Solving the least squares problem... ")
 	a = lsssolve(R,b)
@@ -86,3 +93,4 @@ function lss(u_trj, du_trj, X, f, J, dJ, s, d_u)
 	end
 	return vsh, dJds
 end
+
