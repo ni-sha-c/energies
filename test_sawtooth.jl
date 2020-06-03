@@ -1,30 +1,18 @@
-include("solenoid.jl")
+include("sawtooth.jl")
 include("clvs.jl")
 using Test
-#function test_dsolenoid()
-	s = [1.,4]
+function test_dsawtooth()
+	s = rand()
 	m = 10
-	u0 = rand(m,3)
-	u_trj = solenoid(u0, s, 1)[2,:,:]
-	u_trj = u_trj'
+	u_trj = rand(m)
 	eps = 1.e-4
-	du_x = (solenoid(u_trj .+ eps.*[1 0. 0.],
-						s, 1)[2,:,:] - 
-				solenoid(u_trj .- eps.*[1 0. 0.], 
-						s, 1)[2,:,:])./(2*eps)
-	du_y = (solenoid(u_trj .+ eps.*[0 1. 0.],
-						s, 1)[2,:,:] - 
-				solenoid(u_trj .- eps.*[0 1. 0.], 
-						s, 1)[2,:,:])./(2*eps)
-	du_z = (solenoid(u_trj .+ eps.*[0 0. 1.],
-						s, 1)[2,:,:] - 
-				solenoid(u_trj .- eps.*[0 0. 1.], 
-						s, 1)[2,:,:])./(2*eps)
-	du_fd = reshape(collect([du_x; du_y; du_z]), 
-						3, 3, m)
-	du = dsolenoid(u_trj, s)
+	du_fd = (sawtooth(u_trj .+ eps,
+						s, 1)[2,:] - 
+				sawtooth(u_trj .- eps, 
+						s, 1)[2,:])./(2*eps)
+	du = dsawtooth(u_trj, s)
 	@assert all(isapprox.(du_fd, du)) == 1
-#end
+end
 function test_les()
 	s = [10., 28., 8/3]
 	m = 1
@@ -65,8 +53,8 @@ function test_lss()
 						du_trj, X, f, J, dJ, 
 						  s, d_u)
 		println(size(y))
-		global vsh .= y
-		global u_init .= reshape(u_trj[end,:],3,1)
+		vsh .= y
+		u_init .= reshape(u_trj[end,:],3,1)
 	end
 	@test isapprox((sum(dJds)/n_samples),1.0,rtol=0.1)  
 	return vsh, dJds

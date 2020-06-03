@@ -23,11 +23,6 @@ function solenoid(u0, s, n)
 	return permutedims(u_trj,[3,2,1])
 end
 function dsolenoid(u, s)
-	s = [1.,4.]
-	u = [1. 0. 0.;
-		 0. 0. 1.;
-		 1. 2. 3.;
-		 1 1. 2]
 	s0, s1 = s
 	n, d = size(u)
 	x = view(u,:,1)
