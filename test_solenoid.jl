@@ -24,7 +24,7 @@ function test_dsolenoid()
 	@assert all(isapprox.(du_fd, du, rtol=1.e-2)) == 1
 end
 function test_les()
-	s = [10., 28., 8/3]
+	s = [1., 4.]
 	m = 1
 	n = 25000
 	u0 = rand(3,m)
@@ -49,12 +49,12 @@ function test_perturbation()
 	1
 end
 function test_lss()
-	s = [10., 28., 8/3]
+	s = [1.,4.]
     m = 1
-    n = 2000
-    n_runup = 5000
+    n = 200
+    n_runup = 1000
     u0 = rand(3,m)
-    u_init = lorenz63(u0, s, n)[end,:,:]
+    u_init = solenoid(u0, s, n)[end,:,:]
     d = 3
     d_u = 1
 	dJ = zeros(d,n+1)

@@ -96,4 +96,20 @@ function dcyl_to_cart(r, t)
 	return reshape([cos.(t) sin.(t) -r.*sin.(t) r.*cos.(t)]
 				   ,:, 2, 2)
 end
-
+function objective(u,s)
+	n, d = size(u)
+	u = u'
+	J = zeros(n)
+	[J[i] = sqrt(u[1,i]*u[1,i] + 
+				 u[2,i]*u[2*i] + 
+				 u[3,i]*u[3,i]) for i=1:n]
+	return J
+end
+function dobjective(u,s)
+	n, d = size(u)
+	x, y, z = u[:,1], u[:,2], u[:,3]
+	r = sqrt.(x.*x + y.*y + z.*z)
+	dJ = reshape([x./r y./r z./r],n,d)
+	dJ = dJ'
+	return dJ
+end
