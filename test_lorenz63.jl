@@ -68,5 +68,36 @@ function test_lss()
 	@test isapprox((sum(dJds)/n_samples),1.0,rtol=0.1)  
 	return vsh, dJds
 end
+function test_condition_number()
+	s = [10., 28., 8/3]
+    m = 1
+    n_runup = 5000
+    u0 = rand(3,m)
+    u_init = lorenz63(u0, s, n_runup)[end,:,:]
+    d = 3
+    d_u = 2
+	n_samples = 30
+	dJds = zeros(n_samples)
+	condnum = zeros(n_samples)
+	n_arr = LinRange(500, 5000, n_samples)
+	for i=1:n_samples
+		println("Starting LSS, sample ", i)
+		n = floor(Int64,n_arr[i])
+		u_trj = lorenz63(u_init, s, n)[:,:,1]
+		du_trj = dlorenz63(u_trj, s)
+    	X = perturbation(u_trj,s) #ith col in T_{u_{i+1}} M
+		f = zeros(d,n+1)
+		J = u_trj[:,3]
+		dJ = zeros(d,n+1)
+		dJ[3,:] .= 1.
 
-	
+		y, dJds[i], c = lss(u_trj, du_trj, X, f, J, 
+						 dJ, s, d_u)
+		condnum[i] = c
+		println(dJds[i])
+		u_init .= reshape(u_trj[end,:],3,1)
+	end
+	@test isapprox((sum(dJds)/n_samples),1.0,rtol=0.1)  
+	return dJds, condnum
+end
+

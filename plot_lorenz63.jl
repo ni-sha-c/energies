@@ -29,3 +29,14 @@ function plot_sensitivity()
 	ax1.plot(sum(dJds)/n_samples*ones(n_samples),"--")
 	#mean value: 0.905328466, variance = 0.042
 end
+function plot_condition_number()
+	dJds, condnum = test_condition_number()
+	fig, ax = subplots(1,1)
+	n_samples = size(dJds)[1]
+	ax.plot(1:n_samples, condnum, ".", ms=4.0)
+	ax.set_xlabel("trajectory length",fontsize=18)
+	ax.set_ylabel("condition number",
+					  fontsize=18)
+	ax.xaxis.set_tick_params(labelsize=18)
+	ax.yaxis.set_tick_params(labelsize=18)
+end

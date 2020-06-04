@@ -1,7 +1,7 @@
 # LSS solve
 using SparseArrays
 using BlockArrays
-
+using LinearAlgebra
 function lsssolve(R, b)
     d_u, n = size(b)
     ndu = n*d_u
@@ -13,7 +13,8 @@ function lsssolve(R, b)
     D = sparse([Array(D) zeros(ndu, d_u)])
     B = D - eye
     BB = B*transpose(B)
-    a = -transpose(B)*(BB\b[:])
+	condno = cond(Matrix(BB))
+	a = -transpose(B)*(BB\b[:])
     a = reshape(a, d_u, n+1)[:,1:end-1]
-	return a
+	return a, condno
 end

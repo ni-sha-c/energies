@@ -71,7 +71,7 @@ function lss(u_trj, du_trj, X, f, J, dJ, s, d_u)
 	
 	b = reshape(collect(b),d_u, n)
 	println("Solving the least squares problem... ")
-	a = lsssolve(R,b)
+	a, condno = lsssolve(R,b)
 ~
 	# shadowing direction
 	println("Computing shadowing direction...")
@@ -91,6 +91,6 @@ function lss(u_trj, du_trj, X, f, J, dJ, s, d_u)
 			dJds += vsh[:,i]'*dJ[:,i]/n + 
 			xi[i]*(Jmean .- J[i])
 	end
-	return vsh, dJds
+	return vsh, dJds, condno
 end
 
