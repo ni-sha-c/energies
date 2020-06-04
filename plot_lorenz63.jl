@@ -33,7 +33,8 @@ function plot_condition_number()
 	dJds, condnum = test_condition_number()
 	fig, ax = subplots(1,1)
 	n_samples = size(dJds)[1]
-	ax.plot(1:n_samples, condnum, ".", ms=4.0)
+	n_arr = StepRange(500, 155, 5000)
+	ax.plot(n_arr, condnum, ".", ms=10.0)
 	ax.set_xlabel("trajectory length",fontsize=18)
 	ax.set_ylabel("condition number",
 					  fontsize=18)

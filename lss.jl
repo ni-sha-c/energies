@@ -43,54 +43,64 @@ function lss(u_trj, du_trj, X, f, J, dJ, s, d_u)
     R[:,:,1] = A.R
 	
 	b = zeros(d_u,1,n) #1 is the # parameters
+	pf_Q = zeros(d_u,1,n) #1 is the # parameters
+	pf_v = zeros(n)
+
 	ff = zeros(n)
 	if all(isapprox.(f,0.)) 
 		ff = ones(n)
 	else
 		[ff[i] = sum(x -> x^2, f[:,i]) for i = 1:n]
 	end
-   	
+	pf_Q[:,1,1] = Q[:,:,1]'*f[:,1]
+	[Q[:,j,1] = Q[:,j,1] - (pf_Q[j,1,1]*
+	 		f[:,1]/ff[1]) for j=1:d_u]
 	for i=2:n
 	    v[:,:,i] = du_trj[:,:,i-1]*v[:,:,i-1] + 
 					X[:,i-1]
 		Q[:,:,i] = du_trj[:,:,i-1]*Q[:,:,i-1]
-		[Q[:,j,i] = Q[:,j,i] - (f[:,i]'*
-						Q[:,j,i])*f[:,i]/
-		 				ff[i] for j=1:d_u]
+		pf_Q[:,:,i] = Q[:,:,i]'*f[:,i]
+		[Q[:,j,i] = Q[:,j,i] - pf_Q[j,1,i]*f[:,i]/
+						ff[i] for j=1:d_u]
 		A = qr!(Q[:,:,i])
         Q[:,:,i] = Array(A.Q)
         R[:,:,i] = A.R
+		pf_v[i] = dot(v[:,1,i],f[:,i])
+		v[:,:,i] = v[:,:,i] - (pf_v[i]/
+							   ff[i]*f[:,i])
         b[:,:,i] = (Q[:,:,i]')*v[:,:,i]
-		v[:,:,i] = (v[:,:,i] - 
-					Q[:,:,i]*b[:,:,i] - 
-					(f[:,i]'*v[:,:,i])/
-					(ff[i]).*f[:,i])
+		v[:,:,i] = v[:,:,i] - Q[:,:,i]*b[:,:,i] 
 		lyap_exps .+= log.(abs.(diag(R[:,:,i])))./n
     end
 	
 	
 	b = reshape(collect(b),d_u, n)
 	println("Solving the least squares problem... ")
-	a, condno = lsssolve(R,b)
+	a = lsssolve(R,b)
 ~
 	# shadowing direction
 	println("Computing shadowing direction...")
 	v = reshape(collect(v),d,n)
 	vsh = zeros(d, n)
 	xi = zeros(n)
-	for i = 1:n
-		vsh[:,i] = v[:,i] + Q[:,:,i]*reshape(a[:,i],d_u,1)
-		xi[i] = vsh[:,i]'*f[:,i]/ff[i]
+	vsh[:,1] = Q[:,:,1]*reshape(a[:,1], d_u, 1) + 
+				  v[:,1]
+	for i = 2:n
+		vsh[:,i] = v[:,i] + Q[:,:,i]*reshape(a[:,i],d_u,
+					1)  
+		xi[i] = xi[i-1] + dot(-vsh[:,i] + du_trj[:,:,i-1]*
+					vsh[:,i-1] + X[:,i-1], f[:,i])/ff[i]
 	end
+	println("Maximum discrepancy is", maximum(xi))
 
 	# sensitivity
 	println("Computing sensitivity...")
 	dJds = 0.
 	Jmean = sum(J)/n
 	for i = 1:n
-			dJds += vsh[:,i]'*dJ[:,i]/n + 
-			xi[i]*(Jmean .- J[i])
+			dJds += (vsh[:,i] .+ 
+					 xi[i]*f[:,i])'*dJ[:,i]/n 
 	end
-	return vsh, dJds, condno
+	return vsh, dJds
 end
 

@@ -37,10 +37,10 @@ function Rijke(u0::Array{Float64,1},
 	uDot3 = zeros(N)
 	beta, tau = s
 	dt = 5.e-1/Nc*tau/2.0
-	ufMean = zeros(n)
+	#ufMean = zeros(n)
 	u = copy(u0)
 	for i = 1:n
-		ufMean[i] = dot(u0[1:Ng],cjpixf)
+		#ufMean[i] = dot(u0[1:Ng],cjpixf)
 		u .= copy(u0)
 		f!(uDot1, u, s, i)
 		@. u = u + (1/2)*dt*uDot1
@@ -51,7 +51,7 @@ function Rijke(u0::Array{Float64,1},
 		@. u0 = u0 + dt*((1/6).*uDot1 + 
 					 (2/3)*uDot2 + (1/6)*uDot3)
 	end
-	return u0, ufMean
+	return u0
 end
 function Rijke_ODE(u0::Array{Float64,1}, 
 			   s::Array{Float64,1}=[7.0, 0.2],
@@ -96,8 +96,8 @@ function dRijke(u::Array{Float64,2}, s::Array{Float64,1},
 			u_p .= u0_i .+ eps*v0
 			u_m .= u0_i .- eps*v0
 
-			dTu[:,j,i] = (Rijke(u_p, s, 1)[1] - 
-						 Rijke(u_m, s, 1)[1])/(2*eps)
+			dTu[:,j,i] = (Rijke(u_p, s, 1) - 
+						 Rijke(u_m, s, 1))/(2*eps)
 		end
 	end
 	return dTu

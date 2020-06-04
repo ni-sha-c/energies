@@ -40,7 +40,7 @@ end
 function test_lss()
 	s = [10., 28., 8/3]
     m = 1
-    n = 5000
+    n = 3000
     n_runup = 5000
     u0 = rand(3,m)
     u_init = lorenz63(u0, s, n)[end,:,:]
@@ -48,7 +48,7 @@ function test_lss()
     d_u = 2
 	dJ = zeros(d,n+1)
 	dJ[3,:] .= 1.
-	n_samples = 100
+	n_samples = 10
 	dJds = zeros(n_samples)
 	vsh = zeros(d,n+1,n_samples)
 	for i=1:n_samples
@@ -56,8 +56,8 @@ function test_lss()
 		u_trj = lorenz63(u_init, s, n)[:,:,1]
 		du_trj = dlorenz63(u_trj, s)
     	X = perturbation(u_trj,s) #ith col in T_{u_{i+1}} M
-		#f = vectorField(u_trj,s)	
-		f = zeros(d,n+1)
+		f = vectorField(u_trj,s)	
+		#f = zeros(d,n+1)
 		J = u_trj[:,3]
 		y, dJds[i] = lss(u_trj, du_trj, X, f, J, 
 						 dJ, s, d_u)

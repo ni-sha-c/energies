@@ -6,7 +6,7 @@ nRunup = 40000
 s = [7.0,0.2]
 u = Rijke(u, s, nRunup)
 println("Done with Runup")
-nSteps = 100000
+nSteps = 5000
 u_trj = zeros(d,nSteps)
 u_trj[:,1] = u
 for i = 2:nSteps
