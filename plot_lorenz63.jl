@@ -12,12 +12,12 @@ function plot_sensitivity()
 	ax.plot(n, vsh[:,1], label=L"v_{\rm sh,x}")
 	ax.plot(n, vsh[:,2], label=L"v_{\rm sh,y}")
 	ax.plot(n, vsh[:,3], label=L"v_{\rm sh,z}")
-	ax.set_xlabel("time",fontsize=30)
+	ax.set_xlabel("time",fontsize=18)
 	ax.set_ylabel("components of the shadowing direction",
 					  fontsize=18)
 	ax.xaxis.set_tick_params(labelsize=18)
 	ax.yaxis.set_tick_params(labelsize=18)
-	fig.legend()
+	fig.legend(fontsize=18)
 	ax1.set_ylabel("sensitivities from NILSS",fontsize=18)
 	ax1.set_xlabel("sample number",fontsize=18)
 	ax1.set_title("trajectory length = 5000", fontsize=18)
@@ -27,7 +27,8 @@ function plot_sensitivity()
 	ax1.errorbar(x=1:n_samples,y=dJds,yerr=sqrt(var_dJds),
 			 linestyle="none",ms=4)
 	ax1.plot(sum(dJds)/n_samples*ones(n_samples),"--")
-	#mean value: 0.905328466, variance = 0.042
+	#mean value: 0.905328466, variance = 0.042, without 
+	# time dilation
 end
 function plot_condition_number()
 	dJds, condnum = test_condition_number()
