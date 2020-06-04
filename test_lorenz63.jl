@@ -40,32 +40,33 @@ end
 function test_lss()
 	s = [10., 28., 8/3]
     m = 1
-    n = 5000
+    n = 3000
     n_runup = 5000
     u0 = rand(3,m)
     u_init = lorenz63(u0, s, n)[end,:,:]
     d = 3
-    d_u = 1
+    d_u = 2
 	dJ = zeros(d,n+1)
 	dJ[3,:] .= 1.
 	n_samples = 10
 	dJds = zeros(n_samples)
-	vsh = zeros(d,n+1)
+	vsh = zeros(d,n+1,n_samples)
 	for i=1:n_samples
 		println("Starting LSS, sample ", i)
 		u_trj = lorenz63(u_init, s, n)[:,:,1]
 		du_trj = dlorenz63(u_trj, s)
-    	du_trj = permutedims(du_trj,[2,3,1])
     	X = perturbation(u_trj,s) #ith col in T_{u_{i+1}} M
-		f = vectorField(u_trj,s)	
+		#f = vectorField(u_trj,s)	
+		f = zeros(d,n+1)
 		J = u_trj[:,3]
-		y, dJds[i] = lss(u_trj,  
-						du_trj, X, f, J, dJ, 
-						  s, d_u)
+		y, dJds[i] = lss(u_trj, du_trj, X, f, J, 
+						 dJ, s, d_u)
 		println(dJds[i])
-		vsh .= y
+		vsh[:,:,i] = y
 		u_init .= reshape(u_trj[end,:],3,1)
 	end
 	@test isapprox((sum(dJds)/n_samples),1.0,rtol=0.1)  
 	return vsh, dJds
 end
+
+	
