@@ -40,7 +40,7 @@ end
 function test_lss()
 	s = [10., 28., 8/3]
     m = 1
-    n = 3000
+    n = 5000
     n_runup = 5000
     u0 = rand(3,m)
     u_init = lorenz63(u0, s, n)[end,:,:]
@@ -48,7 +48,7 @@ function test_lss()
     d_u = 2
 	dJ = zeros(d,n+1)
 	dJ[3,:] .= 1.
-	n_samples = 10
+	n_samples = 100
 	dJds = zeros(n_samples)
 	vsh = zeros(d,n+1,n_samples)
 	for i=1:n_samples
