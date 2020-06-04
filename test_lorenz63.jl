@@ -56,8 +56,8 @@ function test_lss()
 		u_trj = lorenz63(u_init, s, n)[:,:,1]
 		du_trj = dlorenz63(u_trj, s)
     	X = perturbation(u_trj,s) #ith col in T_{u_{i+1}} M
-		f = vectorField(u_trj,s)	
-		#f = zeros(d,n+1)
+		#f = vectorField(u_trj,s)	
+		f = zeros(d,n+1)
 		J = u_trj[:,3]
 		y, dJds[i] = lss(u_trj, du_trj, X, f, J, 
 						 dJ, s, d_u)
