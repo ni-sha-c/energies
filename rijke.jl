@@ -72,7 +72,7 @@ function f!(uDot, u, s, t)
 	uDot[tNg:N] .= -2.0/tau.*(D*[v; 
 					dot(eta, cjpixf)])[1:end-1]
 end
-function perturbation(u,s)
+function dfdbeta(u,s)
 	n, d = size(u)
 	beta, tau = s
 	v1 = u[:,2*Ng + 1] 
@@ -81,6 +81,13 @@ function perturbation(u,s)
 					kron(-2.0.*ones(n).*dheat, sjpixf);
 					zeros(Nc*n)], d, n)
 end
+function perturbation(u, s, eps=1.e-6)
+	n, d = size(u)
+	beta, tau = s
+	return (Rijke(u, [beta + eps, tau], 1) - 
+			Rijke(u, [beta - eps, tau], 1))/(2*eps)
+end
+
 function dRijke(u::Array{Float64,2}, s::Array{Float64,1},
 			   eps::Float64)
 	d, m = size(u)
