@@ -1,139 +1,59 @@
 dt = 0.005
 function lorenz63(u0, s, n)
-	sigma, rho, beta = s
-	d, m = size(u0)
-	n = n+1
-	u_trj = zeros((m,d,n))
-	u_trj[:,:,1] = u0'
-	for i = 2:n
-		x = u_trj[:,1,i-1]
-		y = u_trj[:,2,i-1]
-		z = u_trj[:,3,i-1]
-	
-		u_trj[:,1,i] = x + dt*(sigma.*(y - x))
-		u_trj[:,2,i] = y + dt*(x.*(rho .- z) - y)
-		u_trj[:,3,i] = z + dt*(x.*y - beta.*z)
-	end 
-	return permutedims(u_trj,[3,2,1])
+    sigma, rho, beta = s
+    d, m = size(u0)
+    n = n+1
+    u_trj = zeros((m,d,n))
+    u_trj[:,:,1] = u0'
+    for i = 2:n
+    	x = u_trj[:,1,i-1]
+    	y = u_trj[:,2,i-1]
+    	z = u_trj[:,3,i-1]
+    
+    	u_trj[:,1,i] = x + dt*(sigma.*(y - x))
+    	u_trj[:,2,i] = y + dt*(x.*(rho .- z) - y)
+    	u_trj[:,3,i] = z + dt*(x.*y - beta.*z)
+    end 
+    return permutedims(u_trj,[3,2,1])
 end
 function dlorenz63(u, s)
-	sigma, rho, beta = s
-	n, d = size(u)
-	x = view(u,:,1)
-	y = view(u,:,2)
-	z = view(u,:,3)
-	du = zeros(n, d, d)
-	@. du[:,1,1] = 1.0 - dt*sigma
-	@. du[:,1,2] = dt*sigma
-	@. du[:,2,1] = dt*(rho - z) 
-	@. du[:,2,2] = 1.0 - dt
-	@. du[:,2,3] = -dt*x 
-	@. du[:,3,1] = dt*y
-	@. du[:,3,2] = dt*x
-	@. du[:,3,3] = 1.0 - dt*beta
-	return reshape([du[:,:,1]'; du[:,:,2]'; 
-					du[:,:,3]'], d, d, n)
+    sigma, rho, beta = s
+    n, d = size(u)
+    x = view(u,:,1)
+    y = view(u,:,2)
+    z = view(u,:,3)
+    du = zeros(n, d, d)
+    @. du[:,1,1] = 1.0 - dt*sigma
+    @. du[:,1,2] = dt*sigma
+    @. du[:,2,1] = dt*(rho - z) 
+    @. du[:,2,2] = 1.0 - dt
+    @. du[:,2,3] = -dt*x 
+    @. du[:,3,1] = dt*y
+    @. du[:,3,2] = dt*x
+    @. du[:,3,3] = 1.0 - dt*beta
+    return reshape([du[:,:,1]'; du[:,:,2]'; 
+    				du[:,:,3]'], d, d, n)
 end
 function perturbation(u,s)
-	n, d = size(u)
-	# the perturbation in row i in T_{u_(i+1)} M
-	return [zeros(1,n); dt*u[:,1]'; zeros(1,n)]
+    n, d = size(u)
+    # the perturbation in row i in T_{u_(i+1)} M
+    return [zeros(1,n); dt*u[:,1]'; zeros(1,n)]
 end
 function vectorField(u,s)
-	n, d = size(u)
-	sigma, rho, beta = s
-	u = u'
-	x, y, z = u[1,:], u[2,:], u[3,:]
-	return [sigma.*(y - x)  x.*(rho .- z) - y  x.*y - beta.*z]'
+    n, d = size(u)
+    sigma, rho, beta = s
+    u = u'
+    x, y, z = u[1,:], u[2,:], u[3,:]
+    return [sigma.*(y - x)  x.*(rho .- z) - y  x.*y - beta.*z]'
 end
-#=
-    def objective(self, fields, parameter):
-        return fields[-1]
-
-    def source(self, fields, parameter):
-        sourceTerms = np.zeros_like(fields)
-        sourceTerms[1] = self.dt*fields[0]
-        return sourceTerms
-        
-    def gradientObjective(self, fields, parameter):
-        dJ = np.zeros_like(fields)
-        dJ[-1] = 1.0
-        return dJ
-
-    def tangentSolver(self, initFields, initPrimalFields, \
-            parameter, nSteps, homogeneous=False):
-        primalTrj = np.empty(shape=(nSteps, initFields.shape[0]))
-        objectiveTrj = np.empty(nSteps)
-        dt = self.dt
-        primalTrj[0] = initPrimalFields
-        objectiveTrj[0] = self.objective(primalTrj[0],parameter)
-        for i in range(1, nSteps):
-            primalTrj[i], objectiveTrj[i] = self.primalSolver(\
-                    primalTrj[i-1], parameter, 1)
-        xt, yt, zt = initFields
-        sensitivity = np.dot(initFields, \
-                    self.gradientObjective(primalTrj[0], parameter))/nSteps
-
-        for i in range(nSteps):
-            x, y, z = primalTrj[i]
-            dxt_dt = self.sigma*(yt - xt) 
-            dyt_dt = (parameter + self.rho - z)*xt - zt*x - yt 
-            dzt_dt = x*yt + y*xt - self.beta*zt
-            
-            xt += dt*dxt_dt 
-            yt += dt*dyt_dt
-            zt += dt*dzt_dt
-            
-            finalFields = np.array([xt, yt, zt])
-            if(homogeneous==False):
-                finalFields += self.source(primalTrj[i],\
-                        parameter)
-                xt, yt, zt = finalFields
-
-            if(i < nSteps-1):
-                sensitivity += np.dot(finalFields, \
-                    self.gradientObjective(primalTrj[i+1], parameter))/nSteps
-        return finalFields, sensitivity
-            
-
-    def adjointSolver(self, initFields, initPrimalFields, \
-            parameter, nSteps, homogeneous=False):
-        rho = self.rho
-        beta = self.beta
-        sigma = self.sigma
-        dt = self.dt
-        primalTrj = np.empty(shape=(nSteps, initFields.shape[0]))
-        objectiveTrj = np.empty(nSteps)
-
-        primalTrj[0] = initPrimalFields
-        objectiveTrj[0] = self.objective(primalTrj[0],parameter)
-        for i in range(1, nSteps):
-            primalTrj[i], objectiveTrj[i] = self.primalSolver(\
-                    primalTrj[i-1], parameter, 1)
-        xa, ya, za = initFields
-        sensitivity = 0.
-        for i in range(nSteps-1, -1, -1):
-            x, y, z = primalTrj[i]
-            dxa_dt = -sigma*xa + (parameter + rho - z)*ya + \
-                    y*za 
-            dya_dt = sigma*xa - ya + x*za 
-            dza_dt = -x*ya - beta*za 
-            
-            xa += dt*dxa_dt 
-            ya += dt*dya_dt
-            za += dt*dza_dt
-           
-            finalFields = np.array([xa, ya, za])
-            if(homogeneous==False):
-                finalFields += self.gradientObjective(primalTrj[i],\
-                        parameter)/nSteps
-                xa, ya, za = finalFields
-            if(i > 0):
-                sensitivity += np.dot(finalFields, self.source(\
-                    primalTrj[i-1], parameter))
-        return finalFields, sensitivity
-=#            
-
-
-
-            
+function lorenz63_ad(du, u, s, t)
+    du[1] = s[1]*(u[2] - u[1])
+	du[2] = u[1]*(s[2] - u[3]) - u[2]
+	du[3] = u[1]*u[2] - s[3]*u[3]
+end
+function obj_fun(u0, s)
+    prob = ODEProblem(lorenz63_ad, u0, (0.,1.), s)
+	#_prob = remake(prob,u0=u0,p=s) 
+	sol = solve(prob, Tsit5(), saveat=0.005, sensealg=ForwardSensitivity())
+	sum(sol[3,:])/length(sol.t)
+end
