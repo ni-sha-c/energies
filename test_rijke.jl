@@ -1,4 +1,5 @@
 include("rijke.jl")
+include("lss.jl")
 	s = [7.0, 0.2]
 	n = 200
 	d = N
@@ -34,7 +35,7 @@ include("rijke.jl")
 			dJray_trj[1:Ng,i] = cjpixf
 			X_trj[:,i] = perturbation(u_trj[:,i], s)
 			f!(view(f_trj,:,i), u_trj[:,i], s, 1.)
-			du_trj[:, i] = dRijke(u_trj[:,i], s, 1.e-5)
+			du_trj[:,:, i] = dRijke(u_trj[:,i], s, 1.e-5)
 		end
 		y, dJac_ds[k] = lss(u_trj, du_trj, X_trj, 
 							f_trj, Jac_trj, dJac_trj,

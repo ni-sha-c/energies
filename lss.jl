@@ -1,9 +1,9 @@
 include("lsssolve.jl")
 """
 Implements the NILSS algorithm due to Ni and Wang JCP 2017
-Below, u -> F(u) is the time-1 primal map.
+Below, u -> F(u) is the time-1 primal map and u_trj refers 
+to a primal trajectory of length n.
 Inputs:
-	u_trj: nxd n-length timeseries of primal solutions
 	du_trj: dxdxn n-length timeseries of Jacobian matrices
 			along u_trj
 	X: dxn n-length timeseries of perturbation vectors. 
@@ -31,8 +31,8 @@ Outputs:
 		d/ds sum(J) ≈ d/ds <J, mu>, where mu is 
 		the SRB measure.
 """
-function lss(u_trj, du_trj, X, f, J, dJ, s, d_u)
-	n, d = size(u_trj)
+function lss(du_trj, X, f, J, dJ, s, d_u)
+	d, n = size(X)
 	lyap_exps = zeros(d_u)
     R = zeros(d_u,d_u,n)
     Q = zeros(d,d_u,n)
