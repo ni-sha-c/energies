@@ -82,7 +82,7 @@ function dfdbeta(u,s)
 					zeros(Nc*n)], d, n)
 end
 function perturbation(u, s, eps=1.e-6)
-	n, d = size(u)
+	d, = size(u)
 	beta, tau = s
 	return (Rijke(u, [beta + eps, tau], 1) - 
 			Rijke(u, [beta - eps, tau], 1))/(2*eps)
