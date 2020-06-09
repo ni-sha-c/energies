@@ -88,24 +88,21 @@ function perturbation(u, s, eps=1.e-6)
 			Rijke(u, [beta - eps, tau], 1))/(2*eps)
 end
 
-function dRijke(u::Array{Float64,2}, s::Array{Float64,1},
+function dRijke(u::Array{Float64,1}, s::Array{Float64,1},
 			   eps::Float64)
-	d, m = size(u)
-	dTu = zeros(d,d,m)
+	d,  = size(u)
+	dTu = zeros(d,d)
 	u_p = zeros(d)
 	u_m = zeros(d)
 	v0 = zeros(d)
-	for i = 1:m
-		u0_i = view(u,:,i)
-		for j = 1:d
-			v0 .= zeros(d)
-			v0[j] = 1.0
-			u_p .= u0_i .+ eps*v0
-			u_m .= u0_i .- eps*v0
+	for j = 1:d
+		v0 .= zeros(d)
+		v0[j] = 1.0
+		u_p .= u .+ eps*v0
+		u_m .= u .- eps*v0
 
-			dTu[:,j,i] = (Rijke(u_p, s, 1) - 
-						 Rijke(u_m, s, 1))/(2*eps)
-		end
+		dTu[:,j] = (Rijke(u_p, s, 1) - 
+					Rijke(u_m, s, 1))/(2*eps)
 	end
 	return dTu
 end
