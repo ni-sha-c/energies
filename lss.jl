@@ -13,9 +13,9 @@ Inputs:
 			assumption, the only neutral CLV is the RHS of 
 			the primal ode: du/dt = f(u,s). 
 			In case of maps, u_n = F(u_{n+1}), f is zeros.
-	J: n-length timeseries of the scalar function J(u)
-			evaluated along u_trj
-	dJ: dxn n-length timeseries of DJ(u) evaluated along 
+	J:mxn n-length timeseries of m scalar functions J(u)
+			evaluated along u_trj.
+	dJ: mxdxn n-length timeseries of DJ(u) evaluated along 
 			u_trj
 	s: array of parameters
 	d_u: integer dimension of the unstable subspace. You can 		set a guess value to obtain correct sensitivities 
@@ -95,11 +95,11 @@ function lss(du_trj, X, f, J, dJ, s, d_u)
 
 	# sensitivity
 	println("Computing sensitivity...")
-	dJds = 0.
-	Jmean = sum(J)/n
+	dJds = zeros(m)
+	Jmean = sum(J,dims=2)/n
 	for i = 1:n
-			dJds += (vsh[:,i] .+ 
-					 xi[i]*f[:,i])'*dJ[:,i]/n 
+		dJds += dJ[:,:,i]*(vsh[:,i] .+ 
+					 xi[i]*f[:,i])/n 
 	end
 	return vsh, dJds
 end

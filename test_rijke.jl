@@ -14,7 +14,7 @@ include("lss.jl")
 	cjpixf = cos.(pi*xf.*(1:Ng))
 	n_samples = 1
 	dJac_ds = zeros(n_samples)
-	vsh = zeros(d, n_samples)
+	vsh = zeros(d, n, n_samples)
 	for k = 1:n_samples 
 		u = zeros(N)
 		u[1] = 1.
@@ -37,8 +37,8 @@ include("lss.jl")
 			f!(view(f_trj,:,i), u_trj[:,i], s, 1.)
 			du_trj[:,:, i] = dRijke(u_trj[:,i], s, 1.e-5)
 		end
-		y, dJac_ds[k] = lss(u_trj, du_trj, X_trj, 
+		y, dJac_ds[k] = lss(du_trj, X_trj, 
 							f_trj, Jac_trj, dJac_trj,
 							s, 3)
-		vsh[:,k] = y
+		vsh[:,:,k] = y
 	end
