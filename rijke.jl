@@ -56,8 +56,9 @@ end
 function Rijke_ODE(u0::Array{Float64,1}, 
 			   s::Array{Float64,1}=[7.0, 0.2],
 			   n::Int64=1)
-	prob = ODEProblem{true}(f!, u0, (0.,1000), s)
-	sol = concrete_solve(prob, Tsit5())
+	t = n*0.01
+	prob = ODEProblem(f!, u0, (0.,t), s)
+	sol = Array(solve(prob, Tsit5(),saveat=0.01))
 	return sol
 end
 function f!(uDot, u, s, t)
@@ -106,6 +107,5 @@ function dRijke(u::Array{Float64,1}, s::Array{Float64,1},
 	end
 	return dTu
 end
-
 
 

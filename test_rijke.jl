@@ -1,7 +1,7 @@
 include("rijke.jl")
 include("lss.jl")
 	s = [7.0, 0.2]
-	n = 200
+	n = 5000
 	d = N
 	u_trj = zeros(d,n)
 	Jac_trj = ones(n)
@@ -13,19 +13,23 @@ include("lss.jl")
 	xf = 0.2
 	cjpixf = cos.(pi*xf.*(1:Ng))
 	n_samples = 1
-	dJac_ds = zeros(n_samples)
+	dJds = zeros(2,n_samples)
 	vsh = zeros(d, n, n_samples)
+	nRunup = 40000
+	u = Rijke(rand(d),s,nRunup)
+	u_trj[:,end] = u
 	for k = 1:n_samples 
-		u = zeros(N)
-		u[1] = 1.
-
-		u_trj[:,1] = u
+		println("sample number:", k)
+		u_trj[:,1] = u_trj[:,end]
 		X_trj[:,1] = perturbation(u, s)
 		# this last parameter is t to be compatible with 
 		# ODE problem
 
-		f!(view(f_trj, :, 1), u, s, 1.) 
+		f!(view(f_trj, :, 1), u, s, 1.)
+
 		du_trj = zeros(d, d, n)
+		
+		du_trj[:,:, 1] = dRijke(u_trj[:,1], s, 1.e-6)
 		for i = 2:n
 			u_trj[:,i] = Rijke(u_trj[:,i-1], s, 1)
 			vel_p_i = view(u_trj, 1:2*Ng, i)
@@ -33,12 +37,14 @@ include("lss.jl")
 			Jray_trj[i] = dot(cjpixf, vel_p_i[1:Ng]) 
 			dJac_trj[1:2*Ng,i] = 0.5*vel_p_i
 			dJray_trj[1:Ng,i] = cjpixf
-			X_trj[:,i] = perturbation(u_trj[:,i], s)
+			X_trj[:,i] = perturbation(u_trj[:,i], s, 1.e-6)
 			f!(view(f_trj,:,i), u_trj[:,i], s, 1.)
-			du_trj[:,:, i] = dRijke(u_trj[:,i], s, 1.e-5)
+			du_trj[:,:, i] = dRijke(u_trj[:,i], s, 1.e-6)
 		end
-		y, dJac_ds[k] = lss(du_trj, X_trj, 
-							f_trj, Jac_trj, dJac_trj,
-							s, 3)
+		J = [Jac_trj Jray_trj]'
+		dJ = reshape([dJac_trj dJray_trj], d, n, 2)
+		dJ = permutedims(dJ, [3, 1, 2])
+		y, xi = lss(du_trj, X_trj, f_trj, s, 3)
+		dJds[:,k] = compute_sens(y, xi, dJ, f_trj)
 		vsh[:,:,k] = y
 	end

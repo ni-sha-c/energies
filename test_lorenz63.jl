@@ -1,7 +1,7 @@
 include("lorenz63.jl")
 include("clvs.jl")
 include("lss.jl")
-using Test
+#using Test
 #using DiffEqSensitivity, OrdinaryDiffEq, Zygote
 function test_dlorenz63()
     s = [10., 28., 8/3]
@@ -102,18 +102,61 @@ function test_condition_number()
     return dJds, condnum
 end
 function test_Zygote()
-
+#let
     s = [10., 28., 8/3]
-	du0, ds = zeros(3), 0.
-	n_samples = 10000
+	du0, ds = zeros(3), zeros(3)
+	n_samples = 1000
 	#prob = ODEProblem(lorenz63_ad, u0, (0.,1.), s) 
     for i =1:n_samples
 		u0 = rand(3)
 		println("sample number, ", i)
 		#sol = solve(prob,Tsit5(),saveat=0.005,sensealg=QuadratureAdjoint())
     	du01, ds1 = Zygote.gradient(obj_fun, u0, s)	
-		du0 += du01/n_samples
-		ds += ds1/n_samples
+		@show du01, ds1
+		du0 .+= du01/n_samples
+		ds .+= ds1/n_samples
 	end
+	return du0, ds
 end
+function test_tangent_ad()
+	s = [10., 28., 8/3]
+	du0, ds = zeros(3), zeros(3)
+	n_samples = 1000
+	#prob = ODEProblem(lorenz63_ad, u0, (0.,1.), s) 
+    for i =1:n_samples
+		u0 = rand(3)
+		println("sample number, ", i)
+		#sol = solve(prob,Tsit5(),saveat=0.005,sensealg=QuadratureAdjoint())
+    	du01, ds1 = Zygote.gradient(obj_fun, u0, s)	
+		@show du01, ds1
+		du0 .+= du01/n_samples
+		ds .+= ds1/n_samples
+	end
+	return du0, ds
+end
+#Tangent NILSS
+function obj_fun_Q(v0,u0)
+	sol=	solve(u0 + eps*v0, s, (0.,1.))
+	return sol[:,end]
+end
+# To get Q, differentiate obj_fun_Q wrt v0
+function obj_fun_v(u0, v0)
+	sol=	solve(u0 + eps*v0, s + eps*ds0, (0.,1.))
+	return sol[:,end]
+end
+# To get v, differentiate obj_fun_v wrt ds0
 
+#Adjoint NILSS
+function obj_fun_vT(w0,u0)
+	sol = solve(u0, s, (0.,1.))
+	sol[:, end] .+= eps*w0
+	J = sum(sol[3,:])/n
+	return J
+end
+#Derivative of obj_fun_vT wrt w0 to get vT
+function obj_fun_QT(w0,u0)
+	sol = solve(u0, s, (0.,1.))
+	sol[:, end] .+= eps*w0
+	return sol[:,end]
+end
+#Derivative of obj_fun_QT wrt w0 to get QT

@@ -52,8 +52,8 @@ function lorenz63_ad(du, u, s, t)
 	du[3] = u[1]*u[2] - s[3]*u[3]
 end
 function obj_fun(u0, s)
-    prob = ODEProblem(lorenz63_ad, u0, (0.,1.), s)
+    prob = ODEProblem(lorenz63_ad, u0, (0.,1.1), s)
 	#_prob = remake(prob,u0=u0,p=s) 
-	sol = solve(prob, Tsit5(), saveat=0.005, sensealg=ForwardSensitivity())
-	sum(sol[3,:])/length(sol.t)
+	sol = solve(prob, Tsit5(), saveat=0.005)
+	sum(sol[3,:])/size(sol,2)
 end

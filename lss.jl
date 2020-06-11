@@ -31,7 +31,7 @@ Outputs:
 		d/ds sum(J) ≈ d/ds <J, mu>, where mu is 
 		the SRB measure.
 """
-function lss(du_trj, X, f, J, dJ, s, d_u)
+function lss(du_trj, X, f, s, d_u)
 	d, n = size(X)
 	lyap_exps = zeros(d_u)
     R = zeros(d_u,d_u,n)
@@ -55,6 +55,7 @@ function lss(du_trj, X, f, J, dJ, s, d_u)
 	pf_Q[:,1,1] = Q[:,:,1]'*f[:,1]
 	[Q[:,j,1] = Q[:,j,1] - (pf_Q[j,1,1]*
 	 		f[:,1]/ff[1]) for j=1:d_u]
+
 	for i=2:n
 	    v[:,:,i] = du_trj[:,:,i-1]*v[:,:,i-1] + 
 					X[:,i-1]
@@ -72,13 +73,11 @@ function lss(du_trj, X, f, J, dJ, s, d_u)
 		v[:,:,i] = v[:,:,i] - Q[:,:,i]*b[:,:,i] 
 		lyap_exps .+= log.(abs.(diag(R[:,:,i])))./n
     end
-	
+	println(lyap_exps/0.005)	
 	
 	b = reshape(collect(b),d_u, n)
 	println("Solving the least squares problem... ")
 	a = lsssolve(R,b)
-~
-	# shadowing direction
 	println("Computing shadowing direction...")
 	v = reshape(collect(v),d,n)
 	vsh = zeros(d, n)
@@ -91,16 +90,16 @@ function lss(du_trj, X, f, J, dJ, s, d_u)
 		xi[i] = xi[i-1] + dot(-vsh[:,i] + du_trj[:,:,i-1]*
 					vsh[:,i-1] + X[:,i-1], f[:,i])/ff[i]
 	end
+	return vsh, xi
 	println("Maximum discrepancy is", maximum(xi))
-
-	# sensitivity
+end
+function compute_sens(vsh, xi, dJ, f)
 	println("Computing sensitivity...")
+	m, d, n = size(dJ)
 	dJds = zeros(m)
-	Jmean = sum(J,dims=2)/n
 	for i = 1:n
-		dJds += dJ[:,:,i]*(vsh[:,i] .+ 
+		dJds .= dJds .+ dJ[:,:,i]*(vsh[:,i] .+ 
 					 xi[i]*f[:,i])/n 
 	end
-	return vsh, dJds
+	return dJds
 end
-
