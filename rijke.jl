@@ -21,14 +21,14 @@ coeffs = [-1.0, 0.0, 1.75e3, 6.2e-12, -7.5e6]
 tau = 0.2
 dt = 5.e-1/Nc*tau*2.0
 function qfun(t)
-#	if abs(t + 1.0) > 0.01 
+	if abs(t + 1.0) > 0.01 
 		return sqrt(abs(1.0 + t)) - 1.0
-#	end
-#	q = 0.
-#	for i = 1:5
-#		q += coeffs[i]*(t^(5-i))
-#	end
-#	return q 
+	end
+	q = 0.
+	for i = 1:5
+		q += coeffs[i]*(t^(5-i))
+	end
+	return q 
 end	
 D = cheb_diff_matrix(Nc)
 function Rijke(u0::Array{Float64,1}, 

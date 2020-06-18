@@ -9,7 +9,7 @@ function Jray(u,s,n)
 	return dot(cjpixf, u1[1:Ng])
 end
 	s = [7.0, 0.2]
-	n = 200
+	n = 5000
 	d = N
 	u_trj = zeros(d,n)
 	Jac_trj = ones(n)
@@ -18,7 +18,7 @@ end
 	dJray_trj = zeros(d,n)
 	f_trj = zeros(d,n)
 	X_trj = zeros(d,n)
-	n_samples = 10000
+	n_samples = 1
 	dJds = zeros(2,n_samples)
 	vsh = zeros(d, n, n_samples)
 	nRunup = 40000
