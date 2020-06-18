@@ -2,7 +2,7 @@ include("lorenz63.jl")
 include("clvs.jl")
 include("lss.jl")
 #using Test
-#using DiffEqSensitivity, OrdinaryDiffEq, Zygote
+using DiffEqSensitivity, OrdinaryDiffEq, Zygote
 function test_dlorenz63()
     s = [10., 28., 8/3]
     m = 10

@@ -18,6 +18,8 @@ sjpixf = @. sin.(xf.*jpi)
 zetaj = @. c1.*j.*j .+ c2.*
 		sqrt.(j)
 coeffs = [-1.0, 0.0, 1.75e3, 6.2e-12, -7.5e6]
+tau = 0.2
+dt = 5.e-1/Nc*tau*2.0
 function qfun(t)
 #	if abs(t + 1.0) > 0.01 
 		return sqrt(abs(1.0 + t)) - 1.0
@@ -36,29 +38,28 @@ function Rijke(u0::Array{Float64,1},
 	uDot2 = zeros(N)
 	uDot3 = zeros(N)
 	beta, tau = s
-	dt = 5.e-1/Nc*tau/2.0
 	#ufMean = zeros(n)
 	u = copy(u0)
 	for i = 1:n
 		#ufMean[i] = dot(u0[1:Ng],cjpixf)
-		u .= copy(u0)
+		un = copy(u)
 		f!(uDot1, u, s, i)
 		@. u = u + (1/2)*dt*uDot1
 		f!(uDot2, u, s, i)
-		@. u = u0 - dt*uDot1 + 
+		@. u = u - dt*uDot1 + 
 			2*dt*uDot2
 		f!(uDot3, u, s, i)
-		@. u0 = u0 + dt*((1/6).*uDot1 + 
+		@. u = un + dt*((1/6).*uDot1 + 
 					 (2/3)*uDot2 + (1/6)*uDot3)
 	end
-	return u0
+	return u
 end
 function Rijke_ODE(u0::Array{Float64,1}, 
 			   s::Array{Float64,1}=[7.0, 0.2],
 			   n::Int64=1)
-	t = n*0.01
+	t = n*dt
 	prob = ODEProblem(f!, u0, (0.,t), s)
-	sol = Array(solve(prob, Tsit5(),saveat=0.01))
+	sol = Array(solve(prob, Tsit5(),saveat=dt))
 	return sol
 end
 function f!(uDot, u, s, t)

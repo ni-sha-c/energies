@@ -1,7 +1,15 @@
 include("rijke.jl")
 include("lss.jl")
+function Jac(u,s,n)
+	u1 = Rijke_ODE(u,s,n)[:,end]
+	return sum(x->x*x, u1[1:2*Ng])
+end
+function Jray(u,s,n)
+	u1 = Rijke_ODE(u,s,n)[:,end]
+	return dot(cjpixf, u1[1:Ng])
+end
 	s = [7.0, 0.2]
-	n = 5000
+	n = 200
 	d = N
 	u_trj = zeros(d,n)
 	Jac_trj = ones(n)
@@ -10,9 +18,7 @@ include("lss.jl")
 	dJray_trj = zeros(d,n)
 	f_trj = zeros(d,n)
 	X_trj = zeros(d,n)
-	xf = 0.2
-	cjpixf = cos.(pi*xf.*(1:Ng))
-	n_samples = 1
+	n_samples = 10000
 	dJds = zeros(2,n_samples)
 	vsh = zeros(d, n, n_samples)
 	nRunup = 40000
@@ -41,10 +47,27 @@ include("lss.jl")
 			f!(view(f_trj,:,i), u_trj[:,i], s, 1.)
 			du_trj[:,:, i] = dRijke(u_trj[:,i], s, 1.e-6)
 		end
+		println("set up complete")
 		J = [Jac_trj Jray_trj]'
 		dJ = reshape([dJac_trj dJray_trj], d, n, 2)
 		dJ = permutedims(dJ, [3, 1, 2])
-		y, xi = lss(du_trj, X_trj, f_trj, s, 3)
+		y, xi = lss(du_trj, X_trj, zeros(d,n), s, 3)
 		dJds[:,k] = compute_sens(y, xi, dJ, f_trj)
 		vsh[:,:,k] = y
 	end
+	println("Shadowing complete. Ensemble sensitivity starting...")
+#=
+	n_samples = 1000
+	dJacds_ens, dJrayds_ens = zeros(2,n_samples), 
+							zeros(2,n_samples)
+	up = zeros(d)
+	um = zeros(d)
+	eps = 1.e-3
+	n = 100 # produces a growth of ≈ e
+	for i = 1:n_samples
+			@time dJacds_ens[:,i] = Zygote.gradient(s ->Jac(u, s, n), s)[1]
+		dJrayds_ens[:,i] = Zygote.gradient(s ->Jray(u, s, n),
+										   s)[1]
+		u .= Rijke(u, [7.0, 0.2], n)
+	end
+=#
