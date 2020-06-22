@@ -26,7 +26,7 @@ function qfun(t)
 	end
 	q = 0.
 	for i = 1:5
-		q += coeffs[i]*(t^(5-i))
+		q += coeffs[i]*((1+t)^(5-i))
 	end
 	return q 
 end	
