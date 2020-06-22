@@ -1,23 +1,27 @@
 include("rijke.jl")
-include("clvs.jl")
-d = 30
-u = rand(d)
-nRunup = 40000
-s = [7.0,0.2]
-u = Rijke(u, s, nRunup)
-println("Done with Runup")
-nSteps = 5000
-u_trj = zeros(d,nSteps)
-u_trj[:,1] = u
-for i = 2:nSteps
-	u_trj[:,i] = Rijke(u_trj[:,i-1], 
-				s, 1)
+#using Plots
+N = 30
+u0Init = zeros(N)
+u0Init[1] = 1.
+s = [7.0, 0.2]
+nRunUp = 40000
+u0 = Rijke(u0Init, s, nRunUp)
+n_samples = 8
+u1 = zeros(N)
+v0 = rand(N)
+v0 ./= norm(v0)
+v1 = zeros(N)
+eps = 1.e-4
+l1 = zeros(n_samples)
+#dt = 1.e-1/10/2.0
+dt = 1.e-3
+nSeg = 1
+for i = 1:n_samples
+	u0Init .= copy(u0)
+	u1 .= Rijke(u0 .+ eps*v0, s, nSeg)
+	v1 .= (u1 .- u0Init)./eps
+	u0 .= u1
+	l1[i] = log(norm(v1))/nSeg/dt
 end
-println("Done with computing primal trajectory")
-# get Jacobian.
-@time dTu = dRijke(u_trj, s, 1.e-4)
-println("Done with getting Jacobian trajectory")
-println("Getting CLVs...")
-# get clvs
-les, clv_trj = clvs(dTu, 20)
+#plot(cumsum(l1)./StepRange(1,1,n_samples))
 
