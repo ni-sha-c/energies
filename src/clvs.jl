@@ -11,7 +11,7 @@ using LinearAlgebra
 		Q: dxduxm m-length timeseries of the first du CLVs
 
 """
-function clvs(DTu::Array{Float64,3},du::Int64,F::Array{Float64,2})
+function clvs(DTu::Array{Float64,3},du::Int64)
     d = size(DTu)[1]
     m = size(DTu)[3]
     lyap_exps = zeros(du)
@@ -21,14 +21,8 @@ function clvs(DTu::Array{Float64,3},du::Int64,F::Array{Float64,2})
     A = qr!(rand(d,du))
 	Q[:,:,1] = Array(A.Q)
 	R[:,:,1] = A.R
-	FF = ones(m)
-	if isapprox.(sum(F,dims=1),0.) == false
-		FF = [sum(x->x*x, F[:,i]) for i=1:m]
-	end
     for i=2:m
         Q[:,:,i] = DTu[:,:,i-1]*Q[:,:,i-1]
-		[Q[:,j,i] = Q[:,j,i] .- dot(Q[:,j,i], 
-					F[:,i])*F[:,i]/FF[i] for j=1:du]
         A = qr!(Q[:,:,i])
 		Q[:,:,i] = Array(A.Q)
 		R[:,:,i] = A.R
