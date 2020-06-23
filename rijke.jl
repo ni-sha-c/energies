@@ -26,10 +26,11 @@ function qfun(t)
 	end
 	q = 0.
 	for i = 1:5
-		q += coeffs[i]*((1+t)^(5-i))
+		q += coeffs[i]*((1+t)^(i-1))
 	end
 	return q 
 end	
+
 D = cheb_diff_matrix(Nc)
 function Rijke(u0::Array{Float64,1}, 
 			   s::Array{Float64,1}=[7.0, 0.2],
@@ -90,8 +91,7 @@ function perturbation(u, s, eps=1.e-6)
 			Rijke(u, [beta - eps, tau], 1))/(2*eps)
 end
 
-function dRijke(u::Array{Float64,1}, s::Array{Float64,1},
-			   eps::Float64)
+function dRijke(u, s, eps)
 	d,  = size(u)
 	dTu = zeros(d,d)
 	u_p = zeros(d)
