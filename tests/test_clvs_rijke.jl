@@ -1,5 +1,5 @@
-include("rijke.jl")
-include("clvs.jl")
+include("../examples/rijke.jl")
+include("../src/clvs.jl")
 d = 30
 u = rand(d)
 nRunup = 40000
