@@ -19,7 +19,7 @@ zetaj = @. c1.*j.*j .+ c2.*
 		sqrt.(j)
 coeffs = [-1.0, 0.0, 1.75e3, 6.2e-12, -7.5e6]
 tau = 0.2
-dt = 5.e-1/Nc*tau*2.0
+dt = 5.e-1/Nc*tau
 function qfun(t)
 	if abs(t + 1.0) > 0.01 
 		return sqrt(abs(1.0 + t)) - 1.0
@@ -61,7 +61,7 @@ function Rijke_ODE(u0::Array{Float64,1},
 	t = n*dt
 	prob = ODEProblem(f!, u0, (0.,t), s)
 	sol = Array(solve(prob, Tsit5(),saveat=dt))
-	return sol
+	return sol[:,end]
 end
 function f!(uDot, u, s, t)
 	eta = view(u, 1:Ng)
@@ -103,10 +103,18 @@ function dRijke(u, s, eps)
 		u_p .= u .+ eps*v0
 		u_m .= u .- eps*v0
 
-		dTu[:,j] = (Rijke(u_p, s, 1) - 
-					Rijke(u_m, s, 1))/(2*eps)
+		dTu[:,j] = (Rijke_ODE(u_p, s, 1) - 
+					Rijke_ODE(u_m, s, 1))/(2*eps)
 	end
 	return dTu
 end
-
+function dRijke_AD(u, s, eps=0.)
+    du_ad = zeros(d,d)
+    for j = 1:d
+        v = zeros(d)
+        du_ad[:,j] = Zygote.gradient(v->
+                Rijke_ODE(u .+ v, s, 1)[j],v)[1]
+    end
+    return du_ad'
+end    
 

@@ -1,6 +1,6 @@
-include("lorenz63.jl")
-include("clvs.jl")
-include("lss.jl")
+include("../examples/lorenz63.jl")
+include("../src/clvs.jl")
+include("../src/lss.jl")
 #using Test
 using DiffEqSensitivity, OrdinaryDiffEq, Zygote
 function test_dlorenz63()

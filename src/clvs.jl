@@ -17,7 +17,6 @@ function clvs(DTu::Array{Float64,3},du::Int64)
     lyap_exps = zeros(du)
     R = zeros(du,du,m)
     Q = zeros(d,du,m)
-	println(size(Q), size(R))
     A = qr!(rand(d,du))
 	Q[:,:,1] = Array(A.Q)
 	R[:,:,1] = A.R

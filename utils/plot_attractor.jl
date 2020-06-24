@@ -1,12 +1,12 @@
-include("rijke.jl")
+include("../examples/rijke.jl")
 using PyPlot
-n_runup = 40000
+n_runup = 100000
 d = N
 u0 = rand(d)
 beta = 7.0
 tau = 0.2
 s = [beta, tau]
-u = Rijke_ODE(u0, s, n_runup)[:,end]
+u = Rijke_ODE(u0, s, n_runup)
 n_samples = 1000000
 uf, qdot = zeros(n_samples), zeros(n_samples)
 u0 = copy(u)
