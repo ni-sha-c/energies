@@ -91,7 +91,6 @@ function lss(du_trj, X, f, s, d_u)
 					vsh[:,i-1] + X[:,i-1], f[:,i])/ff[i]
 	end
 	return vsh, xi
-	println("Maximum discrepancy is", maximum(xi))
 end
 function compute_sens(vsh, xi, dJ, f)
 	println("Computing sensitivity...")

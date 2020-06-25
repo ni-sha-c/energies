@@ -6,7 +6,7 @@ nRunup = 1000000
 s = [7.0,0.2]
 u = Rijke_ODE(u, s, nRunup)
 println("Done with Runup")
-nSteps = 60000
+nSteps = 2000
 du_trj = zeros(d,d,nSteps)
 du_trj_ad = zeros(d,d,nSteps)
 delayed_velocity = zeros(nSteps)
@@ -45,5 +45,5 @@ println("Done with computing primal and Jacobian
 		trajectory")
 println("Getting CLVs...")
 # get clvs
-les, clv_trj = clvs(du_trj, 4)
+les, clv_trj = clvs(du_trj, 10)
 
