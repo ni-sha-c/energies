@@ -164,7 +164,7 @@ end
 #function test_adjoint_lss()
     s = [10., 28., 8/3]
     m = 1
-    n = 5000
+    n = 2000
     n_runup = 5000
     u0 = rand(3,m)
     u_init = lorenz63(u0, s, n)[end,:,:]
@@ -172,22 +172,24 @@ end
     d_u = 2
     dJ = zeros(d,n+1)
     dJ[3,:] .= 1.
-    n_samples = 1
-    dJds = zeros(n_samples)
+    n_samples = 10
+    dJds = zeros(1,n_samples)
     vsh = zeros(d,n+1,n_samples)
-    #for i=1:n_samples
+    for i=1:n_samples
     	println("Starting LSS, sample ", i)
     	u_trj = lorenz63(u_init, s, n)[:,:,1]
 		u_trj = reverse(u_trj, dims=1)
 		duT_trj = permutedims(dlorenz63(u_trj, s),[2,1,3])
         X = perturbation(u_trj,s) #ith col in T_{u_{i+1}} M
-    	#f = vectorField(u_trj,s)	
-    	f = zeros(d,n+1)
+    	f = vectorField(u_trj,s)
+		X = reshape(X, 1, d, n+1)
+    	#f = zeros(d,n+1)
     	J = u_trj[:,3]
     	y, xi = lss(duT_trj, dJ, f, s, d_u)
     	vsh[:,:,i] = y
     	u_init .= reshape(u_trj[end,:],3,1)
-    #end
+		dJds[:,i] = compute_sens(y, xi, X, f)
+    end
     #@test isapprox((sum(dJds)/n_samples),1.0,rtol=0.1)  
     #return vsh, dJds
 #end
