@@ -1,4 +1,4 @@
-include("lsssolve.jl")
+include("adjoint_lsssolve.jl")
 """
 Implements the NILSAS algorithm due to Ni and Talnikar 2019.
 "Adjoint sensitivity analysis on chaotic dynamical
@@ -35,7 +35,7 @@ Outputs:
 		d/ds sum(J) ≈ d/ds <J, mu>, where mu is 
 		the SRB measure.
 """
-function lss(du_trj, X, f, s, d_u)
+function lss(du_trj, X, f, s, d_u, g)
 	d, n = size(X)
 	lyap_exps = zeros(d_u)
     R = zeros(d_u,d_u,n)
@@ -56,7 +56,7 @@ function lss(du_trj, X, f, s, d_u)
 	else
 		[ff[i] = sum(x -> x^2, f[:,i]) for i = 1:n]
 	end
-	pf_Q[:,1,1] = Q[:,:,1]'*f[:,1]
+	pf_Q[:,1,1] = Q[:,:,1]'*g[:,1]
 	[Q[:,j,1] = Q[:,j,1] - (pf_Q[j,1,1]*
 	 		f[:,1]/ff[1]) for j=1:d_u]
 
@@ -64,13 +64,13 @@ function lss(du_trj, X, f, s, d_u)
 	    v[:,:,i] = du_trj[:,:,i-1]*v[:,:,i-1] + 
 					X[:,i-1]
 		Q[:,:,i] = du_trj[:,:,i-1]*Q[:,:,i-1]
-		pf_Q[:,:,i] = Q[:,:,i]'*f[:,i]
+		pf_Q[:,:,i] = Q[:,:,i]'*g[:,i]
 		[Q[:,j,i] = Q[:,j,i] - pf_Q[j,1,i]*f[:,i]/
 						ff[i] for j=1:d_u]
 		A = qr!(Q[:,:,i])
         Q[:,:,i] = Array(A.Q)
         R[:,:,i] = A.R
-		pf_v[i] = dot(v[:,1,i],f[:,i])
+		pf_v[i] = dot(v[:,1,i],g[:,i])
 		v[:,:,i] = v[:,:,i] - (pf_v[i]/
 							   ff[i]*f[:,i])
         b[:,:,i] = (Q[:,:,i]')*v[:,:,i]
@@ -81,7 +81,7 @@ function lss(du_trj, X, f, s, d_u)
 	
 	b = reshape(collect(b),d_u, n)
 	println("Solving the least squares problem... ")
-	@time a = lsssolve(R,b)
+	@time a = lsssolve(R,b,sum(pf_v),pf_Q[:,1,:])
 	println("Computing shadowing direction...")
 	v = reshape(collect(v),d,n)
 	vsh = zeros(d, n)
