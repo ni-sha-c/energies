@@ -6,9 +6,8 @@ function time_average(s, n, u0)
 	u = copy(u0)
 	J_avg = 0.
 	for i = 1:n
-		u1 = lorenz63(u, s, 1)[end,:,:]
-		J_avg += u1[end,1]/n
-		u = copy(u1)
+		u = lorenz63_ad(u, s, 1)
+		J_avg += u[end]/n
 	end
 	@show J_avg
 	return J_avg
@@ -26,7 +25,8 @@ end
 		u0 = lorenz63(reshape(u_init,:,1), s, 
 					  10)[end,:,1]
 		u_init .= u0
-		dJds[:,i] .= Zygote.gradient(s->obj_fun(u0,s), s)[1]
+		dJds[:,i] .= ForwardDiff.gradient(s->time_average(
+										s,n,u0), s)
 	end
 	@show sum(dJds, dims=2)/n_samples
 
