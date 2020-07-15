@@ -2,7 +2,7 @@ include("../examples/lorenz63.jl")
 include("../src/clvs.jl")
 #include("../src/lss.jl")
 include("../src/adjoint_lss.jl")
-#using Test
+using Test
 using DiffEqSensitivity, OrdinaryDiffEq, Zygote
 function test_dlorenz63()
     s = [10., 28., 8/3]
@@ -102,7 +102,7 @@ function test_condition_number()
     @test isapprox((sum(dJds)/n_samples),1.0,rtol=0.1)  
     return dJds, condnum
 end
-function test_Zygote()
+function test_ensemble_sensitivity()
 #let
     s = [10., 28., 8/3]
 	du0, ds = zeros(3), zeros(3)
@@ -117,6 +117,7 @@ function test_Zygote()
 		du0 .+= du01/n_samples
 		ds .+= ds1/n_samples
 	end
+	@test isapprox(ds[2], 1., rtol=0.1)
 	return du0, ds
 end
 function test_tangent_ad()
@@ -161,7 +162,7 @@ function obj_fun_QT(w0,u0)
 	return sol[:,end]
 end
 #Derivative of obj_fun_QT wrt w0 to get QT
-#function test_adjoint_lss()
+function test_adjoint_lss()
     s = [10., 28., 8/3]
     m = 1
     n = 3000
@@ -193,8 +194,8 @@ end
 		dJds[:,i] = compute_sens(y, xi, X, f)
     end
     #@test isapprox((sum(dJds)/n_samples),1.0,rtol=0.1)  
-    #return vsh, dJds
-#end
+    return vsh, dJds
+end
 
 
 
