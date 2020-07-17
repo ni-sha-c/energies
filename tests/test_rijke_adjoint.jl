@@ -50,8 +50,8 @@ function Rijke_adjoint_sensitivity()
 		end
 		println("set up complete")
 		J = [Jac_trj Jray_trj]'
-		dJ = reshape([dJac_trj dJray_trj], d, n, 2)
-		dJ = permutedims(dJ, [3, 1, 2])
+		#dJ = reshape([dJac_trj dJray_trj], d, n, 2)
+		#dJ = permutedims(dJ, [3, 1, 2])
 		println("Reversing time...")
 		
 		dJ = reverse(dJac_trj, dims=2)
@@ -63,9 +63,13 @@ function Rijke_adjoint_sensitivity()
 		f_end = zeros(d)
 		f!(f_end, u_next, s, 1.)
 		f_trj = [f_end f_trj[:,1:end-1]]
+		dJ_end = zeros(d)
+		dJ_end[1:2*Ng] = 0.5*u_next[1:2*Ng]
+		dJ = [dJ_end dJ[:,1:end-1]]
 		y, xi = lss(du_trj, dJ, zeros(d,n), s, 1, f_trj)
 		dJds[1,k] = compute_sens(y, xi, X_trj, zeros(d,n))[1]
 		vsh[:,:,k] = y
+		@show dJds[1,k]
 	end
 	println("Shadowing complete. Ensemble sensitivity starting...")
 	return vsh, dJds
