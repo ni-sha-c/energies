@@ -73,7 +73,7 @@ function lss(du_trj, X, f, s, d_u)
 		v[:,:,i] = v[:,:,i] - Q[:,:,i]*b[:,:,i] 
 		lyap_exps .+= log.(abs.(diag(R[:,:,i])))./n
     end
-	println(lyap_exps/0.01)	
+	println(lyap_exps/0.005)	
 	
 	b = reshape(collect(b),d_u, n)
 	println("Solving the least squares problem... ")
