@@ -1,5 +1,7 @@
-include("test_lorenz63.jl")
+include("../tests/test_lorenz63.jl")
+include("../examples/lorenz63.jl")
 using PyPlot
+using JLD
 function plot_sensitivity()
 	vsh, dJds = test_lss()
 	fig, ax = subplots(1,1)
@@ -42,3 +44,25 @@ function plot_condition_number()
 	ax.xaxis.set_tick_params(labelsize=18)
 	ax.yaxis.set_tick_params(labelsize=18)
 end
+function plot_data_assmln_err()
+	data = load("../data/l63_asmln_thru_param_estn.jld")
+	z_prd = data["z_prdcn_4gd"]
+	z_obs = data["z_obs"]
+	msq_err = data["msq_err"]
+	n_trj, n_exps = size(z_obs)
+	min_err, ind_min = findmin(msq_err, dims=1)
+	z_opt_prd = view(z_prd, :, ind_min)[:,1,:]
+	opt_err = z_obs - z_opt_prd
+	mean_opt_err = sum(opt_err, dims=2)[:,1]/n_exps
+	std_opt_err = sum((opt_err .- mean_opt_err).^2.0, dims=2)/n_exps
+	std_opt_err = sqrt.(std_opt_err[:,1])
+	fig, ax = subplots(1,1)
+	ax.semilogy(dt*(1:n_trj), mean_opt_err, ".", ms=5.0)
+	ax.xaxis.set_tick_params(labelsize=24)
+	ax.yaxis.set_tick_params(labelsize=24)
+	ax.set_xlabel("time", fontsize=24)
+	ax.set_ylabel("Prediction error", fontsize=24)
+	ax.grid(true)
+end
+
+
