@@ -46,14 +46,13 @@ function plot_condition_number()
 end
 function plot_data_assmln_err()
 	data = load("../data/l63_asmln_thru_param_estn.jld")
-	z_prd = data["z_prdcn_4gd"]
+	z_prd = data["z_prd"]
 	z_obs = data["z_obs"]
 	msq_err = data["msq_err"]
-	n_trj, n_exps = size(z_obs)
-	min_err, ind_min = findmin(msq_err, dims=1)
-	z_opt_prd = view(z_prd, :, ind_min)[:,1,:]
-	opt_err = z_obs - z_opt_prd
-	mean_opt_err = sum(opt_err, dims=2)[:,1]/n_exps
+	n_trj, n_gd, n_exps = size(z_prd)
+	z_opt_prd = view(z_prd, :, n_gd, :)
+	opt_err = z_obs .- z_opt_prd
+	mean_opt_err = sum(opt_err, dims=2)/n_exps
 	std_opt_err = sum((opt_err .- mean_opt_err).^2.0, dims=2)/n_exps
 	std_opt_err = sqrt.(std_opt_err[:,1])
 	fig, ax = subplots(1,1)
