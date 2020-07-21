@@ -10,7 +10,7 @@ function refine_parameter(n, n_gd_steps)
 	u0 = lorenz63(u0, s, n_runup)[end,:,:]
 	u_trj = lorenz63(u0, s, n)[:,:,1]
 	n, d = size(u_trj)
-	eps = 0.005
+	eps = 0.0025
 	n_noise = 2
 	noise = eps*randn(d)
 	z_obs = u_trj[:,3]
@@ -41,7 +41,8 @@ function refine_parameter(n, n_gd_steps)
 		ds = gamma*dJds[i]
 		s[2] = s[2] - ds
 		u_trj = u_trj - ds*y'
-		error[i] =  sum((u_trj[:,3] .- z_obs).^2)/n 
+		error[i] =  sum((u_trj[:,3] .- z_obs).^2)/n
+		@show error[i]
 		u[:,:,i] = u_trj
 	end
 	return z_obs, u[:,3,:], error
