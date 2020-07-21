@@ -73,12 +73,12 @@ function lss(du_trj, X, f, s, d_u)
 		v[:,:,i] = v[:,:,i] - Q[:,:,i]*b[:,:,i] 
 		lyap_exps .+= log.(abs.(diag(R[:,:,i])))./n
     end
-	println(lyap_exps/0.005)	
+	#println(lyap_exps/0.005)	
 	
 	b = reshape(collect(b),d_u, n)
-	println("Solving the least squares problem... ")
-	@time a = lsssolve(R,b)
-	println("Computing shadowing direction...")
+	#println("Solving the least squares problem... ")
+	a = lsssolve(R,b)
+	#println("Computing shadowing direction...")
 	v = reshape(collect(v),d,n)
 	vsh = zeros(d, n)
 	xi = zeros(n)
@@ -93,7 +93,7 @@ function lss(du_trj, X, f, s, d_u)
 	return vsh, xi
 end
 function compute_sens(vsh, xi, dJ, f)
-	println("Computing sensitivity...")
+	#println("Computing sensitivity...")
 	m, d, n = size(dJ)
 	dJds = zeros(m)
 	for i = 1:n

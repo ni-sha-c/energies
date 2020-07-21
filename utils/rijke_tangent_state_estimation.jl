@@ -1,91 +1,107 @@
 include("../examples/rijke.jl")
 include("../src/lss.jl")
-function Jac(u,s,n)
-	u1 = Rijke_ODE(u,s,n)
-	return sum(x->x*x, u1[1:2*Ng])
-end
-function Jray(u,s,n)
-	u1 = Rijke_ODE(u,s,n)
-	return dot(cjpixf, u1[1:Ng])
-end
-function optimize()
-nNewton = 5
-beta_path = zeros(nNewton)
-dJds_mean = zeros(nNewton)
-
-n_samples = 5
-n = 2000
-dJds = zeros(2,n_samples)
-vsh = zeros(N, n, n_samples)
-gamma = 0.1
-beta_path[1] = 6.5
-
-for nN = 1:nNewton-1
-	s = [beta_path[nN], 0.2]
+using LinearAlgebra
+using JLD
+using OrdinaryDiffEq
+function refine_parameter_and_trajectory(n, n_gd_steps)
+	#create epsilon orbit.
+	n_runup = 1000000
+    s = [7.0,0.2]
 	d = N
+	u0 = Rijke_ODE(rand(d), s, n_runup)
+	eps = 0.1
+	noise = eps*randn(d)
 	u_trj = zeros(d,n)
-	Jac_trj = ones(n)
-	Jray_trj = ones(n)
-	dJac_trj = zeros(d,n)
-	dJray_trj = zeros(d,n)
+	u_trj[:,1] = u0 + noise
+	u_obs = zeros(d,n)
+	u_obs[:,1] = u0
+	for i = 2:n
+		u_trj[:,i] = Rijke_ODE(u_trj[:,i-1], s, 1)
+		u_obs[:,i] = Rijke_ODE(u_obs[:,i-1], s, 1)
+	end
+	z_prd = zeros(n, n_gd_steps)
+	z_obs = sum(u_obs[1:2*Ng,:].*u_obs[1:2*Ng,:],dims=1)./4	
+	z_trj = sum(u_trj[1:2*Ng,:].*u_trj[1:2*Ng,:],dims=1)./4
+	z_prd[:,1] = z_trj
+	# run gradient descent to minimize observation error.
+	gamma = 0.1
+	dJds = zeros(n_gd_steps)
+	d_u = 2
+	u = zeros(d, n, n_gd_steps)
+	# compute_sens assumes many objective functions
+	dJ = zeros(1,d,n)
+	error = zeros(n_gd_steps)
+	n_pert = 100
+	flag = 1
+
+	du_trj = zeros(d,d,n)
 	f_trj = zeros(d,n)
 	X_trj = zeros(d,n)
-	nRunup = 60000
-	u = Rijke_ODE(rand(d),s,nRunup)
-	u_trj[:,end] = u
-	for k = 1:n_samples 
-		println("sample number:", k)
-		u_trj[:,1] = u_trj[:,end]
-		X_trj[:,1] = perturbation(u, s)
-		# this last parameter is t to be compatible with 
-		# ODE problem
-
-		f!(view(f_trj, :, 1), u, s, 1.)
-
-		du_trj = zeros(d, d, n)
-		
-		du_trj[:,:, 1] = dRijke(u_trj[:,1], s, 1.e-5)
-		for i = 2:n
-			u_trj[:,i] = Rijke_ODE(u_trj[:,i-1], s, 1)
-			vel_p_i = view(u_trj, 1:2*Ng, i)
-			Jac_trj[i] = 0.25*sum(x->x*x,vel_p_i)
-			Jray_trj[i] = dot(cjpixf, vel_p_i[1:Ng]) 
-			dJac_trj[1:2*Ng,i] = 0.5*vel_p_i
-			dJray_trj[1:Ng,i] = cjpixf
-			X_trj[:,i] = perturbation(u_trj[:,i], s, 1.e-5)
-			f!(view(f_trj,:,i), u_trj[:,i], s, 1.)
-			du_trj[:,:, i] = dRijke(u_trj[:,i], s, 1.e-5)
+	for i = 1:n_gd_steps
+		if flag == 0
+			break
 		end
-		println("set up complete")
-		J = [Jac_trj Jray_trj]'
-		dJ = reshape([dJac_trj dJray_trj], d, n, 2)
-		dJ = permutedims(dJ, [3, 1, 2])
-		y, xi = lss(du_trj, X_trj, zeros(d,n), s, 3)
-		dJds[:,k] .= compute_sens(y, xi, dJ, f_trj)
-		vsh[:,:,k] .= y
-	end
-	
-	thres = 20.0
-	# objective function is Jac + alpha*Jray
-	alpha = 0.
-	n_count = 0
-	for i = 1:n_samples
-		flag = 0
-
-		for j = 1:n
-			if norm(vsh[:,j,i]) > thres
-				flag = 1
+		# Set up LSS
+		# J is now mean of squared observation error.
+		for k = 1:n
+			z_prd[k,i] = sum(x->x*x, u_trj[:,k])/4
+			error_k = (z_obs[k] .- z_prd[k,i])^2.0/n
+			dJ[1,1:2*Ng,k] = -1/n*error_k*u_trj[1:2*Ng,k]
+			du_trj[:,:,k] = dRijke(u_trj[:,k], s, 1.e-6)
+			X = perturbation(u_trj[:,i],s,1.e-6) #ith col in T_{u_{i+1}} M
+			f!(view(f_trj,:,i), u_trj[:,i], s)	
+    		#f = zeros(d,n)
+		end
+    	y, xi = lss(du_trj, X, f_trj, s, d_u)
+		dJds[i] = compute_sens(y, xi, dJ, f_trj)[1]
+    	#println(dJds[i])
+		# Make u_trj the computed shadowing trajectory
+		ds = gamma*dJds[i]
+		s[1] = s[1] - ds
+		#u_trj = u_trj - ds*y'
+		u2 = u_trj[:,n_pert] .- ds*y[:,n_pert]
+		for k = n_pert+1:n
+			u_trj[:,k] = Rijke_ODE(u_trj[:,k-1], s, 1)
+			error[i] += (z_prd[ - z_obs)^2.0/n
+		end
+		error[i] =  sum((u_trj[n_pert:end,3] .- z_obs[n_pert:end]).^2)/(n-n_pert)
+		@show error[i]
+		if i==2
+			if error[i] > error[i-1]
+				flag = 0
+				break
 			end
 		end
-		if flag == 0
-			@show dJds[1,i]
-			n_count = n_count + 1
-			dJds_mean[nN] += dJds[1,i] + alpha*dJds[2,i]
+		u[:,:,i] = u_trj
+	end
+	return z_obs, u[:,3,:], error, flag
+end
+function assimilate_parameter_and_trajectory()
+	n_repeat = 100
+	n = 2000
+	n_gd_steps = 100
+	z_obs = zeros(n, n_repeat)
+	z_trj = zeros(n, n_gd_steps, n_repeat)
+	errors = zeros(n_gd_steps, n_repeat)
+	i = 1
+	while i <= n_repeat
+		@show i
+		res1, res2, res3, flag = refine_parameter_and_trajectory(n-1,
+											n_gd_steps)    
+		if flag==1
+			z_obs[:,i] = res1
+			z_trj[:,:,i] = res2
+			errors[:,i] = res3
+			i = i + 1
 		end
 	end
-	dJds_mean[nN] /= n_count
-	beta_path[nN+1] = beta_path[nN] - gamma*dJds_mean[nN]
-	@show dJds_mean[nN]
-end	
-return dJds_mean, beta_path, dJds, vsh
+	println("Errors are ")
+	@show errors[:,1]
+	save("../data/rijke_asmln_ngd200_n2000.jld", 
+		 "z_obs", z_obs, "z_prd", z_trj, "msq_err",
+		 errors)
+
+	return z_obs, z_trj, errors
 end
+
+	
