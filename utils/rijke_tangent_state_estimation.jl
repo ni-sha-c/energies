@@ -73,10 +73,10 @@ function refine_parameter_and_trajectory(n, n_gd_steps)
 	end
 	return z_obs, z_prd, error, flag
 end
-function assimilate_parameter_and_trajectory()
+function assimilate_parameter_and_trajectory(filename)
 	n_repeat = 1
 	n = 2000
-	n_gd_steps = 50
+	n_gd_steps = 1
 	z_obs = zeros(n, n_repeat)
 	z_trj = zeros(n, n_gd_steps, n_repeat)
 	errors = zeros(n_gd_steps, n_repeat)
@@ -94,7 +94,7 @@ function assimilate_parameter_and_trajectory()
 	end
 	println("Errors are ")
 	@show errors[:,1]
-	save("../data/rijke_asmln_ngd200_n2000_exp5.jld", 
+	save(filename, 
 		 "z_obs", z_obs, "z_prd", z_trj, "msq_err",
 		 errors)
 
