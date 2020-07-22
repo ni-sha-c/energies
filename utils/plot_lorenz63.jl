@@ -45,18 +45,29 @@ function plot_condition_number()
 	ax.yaxis.set_tick_params(labelsize=18)
 end
 function plot_data_assmln_err()
-	data = load("../data/l63_asmln_thru_param_estn.jld")
+	data = load("../data/l63_asmln_ngd200_n2000.jld")
 	z_prd = data["z_prd"]
 	z_obs = data["z_obs"]
 	msq_err = data["msq_err"]
 	n_trj, n_gd, n_exps = size(z_prd)
 	z_opt_prd = view(z_prd, :, n_gd, :)
-	opt_err = z_obs .- z_opt_prd
-	mean_opt_err = sum(opt_err, dims=2)/n_exps
-	std_opt_err = sum((opt_err .- mean_opt_err).^2.0, dims=2)/n_exps
-	std_opt_err = sqrt.(std_opt_err[:,1])
+	err = abs.((z_obs .- z_opt_prd)./z_obs)
+	max_err = findmax(err, dims=1)[1][:]
+	norm_max_err = max_err/maximum(max_err)
+	clr_map = plt.get_cmap("Blues")
+	clr_acc_err = clr_map(norm_max_err)
+	times = dt*LinRange(0,n_trj,n_trj)
+	times = times[100:end]
+	err = err[100:end,:]
 	fig, ax = subplots(1,1)
-	ax.semilogy(dt*(1:n_trj), mean_opt_err, ".", ms=5.0)
+	for i = 1:n_exps
+		ax.semilogy(times, err[:,i], ".", 
+					ms=0.5,color=clr_acc_err[i,:])
+	end
+	mean_err = (sum(err, dims=2)/n_exps)[:]
+	std_err = sum((err .- mean_err).^2.0, dims=2)/n_exps
+	std_err = sqrt.(std_err[:])
+	ax.semilogy(times, mean_err, ".", color="k",ms=2.0)
 	ax.xaxis.set_tick_params(labelsize=24)
 	ax.yaxis.set_tick_params(labelsize=24)
 	ax.set_xlabel("time", fontsize=24)
