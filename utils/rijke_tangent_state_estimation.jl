@@ -5,7 +5,7 @@ using JLD
 using OrdinaryDiffEq
 function refine_parameter_and_trajectory(n, n_gd_steps)
 	#create epsilon orbit.
-	n_runup = 1000000
+	n_runup = 400000
     s = [7.0,0.2]
 	d = N
 	u0 = Rijke_ODE(rand(d), s, n_runup)
@@ -27,7 +27,6 @@ function refine_parameter_and_trajectory(n, n_gd_steps)
 	gamma = 0.1
 	dJds = zeros(n_gd_steps)
 	d_u = 2
-	u = zeros(d, n, n_gd_steps)
 	# compute_sens assumes many objective functions
 	dJ = zeros(1,d,n)
 	error = zeros(n_gd_steps)
@@ -37,22 +36,22 @@ function refine_parameter_and_trajectory(n, n_gd_steps)
 	du_trj = zeros(d,d,n)
 	f_trj = zeros(d,n)
 	X_trj = zeros(d,n)
-	for i = 1:n_gd_steps
+	@time for i = 1:n_gd_steps
 		if flag == 0
 			break
 		end
 		# Set up LSS
 		# J is now mean of squared observation error.
 		for k = 1:n
-			z_prd[k,i] = sum(x->x*x, u_trj[:,k])/4
+			z_prd[k,i] = sum(x->x*x, u_trj[1:2*Ng,k])/4
 			error_k = (z_obs[k] .- z_prd[k,i])^2.0/n
 			dJ[1,1:2*Ng,k] = -1/n*error_k*u_trj[1:2*Ng,k]
 			du_trj[:,:,k] = dRijke(u_trj[:,k], s, 1.e-6)
-			X = perturbation(u_trj[:,i],s,1.e-6) #ith col in T_{u_{i+1}} M
-			f!(view(f_trj,:,i), u_trj[:,i], s)	
+			X_trj[:,k] = perturbation(u_trj[:,k],s,1.e-6) #ith col in T_{u_{i+1}} M
+			f!(view(f_trj,:,k), u_trj[:,k], s, 1.)	
     		#f = zeros(d,n)
 		end
-    	y, xi = lss(du_trj, X, f_trj, s, d_u)
+    	y, xi = lss(du_trj, X_trj, f_trj, s, d_u)
 		dJds[i] = compute_sens(y, xi, dJ, f_trj)[1]
     	#println(dJds[i])
 		# Make u_trj the computed shadowing trajectory
@@ -62,9 +61,8 @@ function refine_parameter_and_trajectory(n, n_gd_steps)
 		u2 = u_trj[:,n_pert] .- ds*y[:,n_pert]
 		for k = n_pert+1:n
 			u_trj[:,k] = Rijke_ODE(u_trj[:,k-1], s, 1)
-			error[i] += (z_prd[ - z_obs)^2.0/n
+			error[i] += (z_prd[k,i] - z_obs[k])^2.0/(n-n_pert)
 		end
-		error[i] =  sum((u_trj[n_pert:end,3] .- z_obs[n_pert:end]).^2)/(n-n_pert)
 		@show error[i]
 		if i==2
 			if error[i] > error[i-1]
@@ -72,21 +70,20 @@ function refine_parameter_and_trajectory(n, n_gd_steps)
 				break
 			end
 		end
-		u[:,:,i] = u_trj
 	end
-	return z_obs, u[:,3,:], error, flag
+	return z_obs, z_prd, error, flag
 end
 function assimilate_parameter_and_trajectory()
-	n_repeat = 100
+	n_repeat = 1
 	n = 2000
-	n_gd_steps = 100
+	n_gd_steps = 50
 	z_obs = zeros(n, n_repeat)
 	z_trj = zeros(n, n_gd_steps, n_repeat)
 	errors = zeros(n_gd_steps, n_repeat)
 	i = 1
 	while i <= n_repeat
 		@show i
-		res1, res2, res3, flag = refine_parameter_and_trajectory(n-1,
+		res1, res2, res3, flag = refine_parameter_and_trajectory(n,
 											n_gd_steps)    
 		if flag==1
 			z_obs[:,i] = res1
@@ -97,7 +94,7 @@ function assimilate_parameter_and_trajectory()
 	end
 	println("Errors are ")
 	@show errors[:,1]
-	save("../data/rijke_asmln_ngd200_n2000.jld", 
+	save("../data/rijke_asmln_ngd200_n2000_exp5.jld", 
 		 "z_obs", z_obs, "z_prd", z_trj, "msq_err",
 		 errors)
 
