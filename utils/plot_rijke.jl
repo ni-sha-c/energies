@@ -1,5 +1,4 @@
-include("../tests/test_lorenz63.jl")
-include("../examples/lorenz63.jl")
+include("../examples/rijke.jl")
 using PyPlot
 using JLD
 function plot_sensitivity()
@@ -44,22 +43,19 @@ function plot_condition_number()
 	ax.xaxis.set_tick_params(labelsize=18)
 	ax.yaxis.set_tick_params(labelsize=18)
 end
-function plot_data_assmln_err()
-	data = load("../data/l63_asmln_ngd200_n2000.jld")
-	z_prd = data["z_prd"]
-	z_obs = data["z_obs"]
-	msq_err = data["msq_err"]
+function plot_da_err(z_prd,z_obs,fig, ax)
 	n_trj, n_gd, n_exps = size(z_prd)
 	z_opt_prd = view(z_prd, :, n_gd, :)
 	err = abs.((z_obs .- z_opt_prd)./z_obs)
 	max_err = findmax(err, dims=1)[1][:]
+	max_err = log.(max_err)
+	max_err = max_err .- minimum(max_err)
 	norm_max_err = max_err/maximum(max_err)
-	clr_map = plt.get_cmap("Blues")
+	clr_map = plt.get_cmap("winter")
 	clr_acc_err = clr_map(norm_max_err)
 	times = dt*LinRange(0,n_trj,n_trj)
-	times = times[100:end]
-	err = err[100:end,:]
-	fig, ax = subplots(1,1)
+	times = times
+	err = err
 	for i = 1:n_exps
 		ax.semilogy(times, err[:,i], ".", 
 					ms=0.5,color=clr_acc_err[i,:])
@@ -68,11 +64,53 @@ function plot_data_assmln_err()
 	std_err = sum((err .- mean_err).^2.0, dims=2)/n_exps
 	std_err = sqrt.(std_err[:])
 	ax.semilogy(times, mean_err, ".", color="k",ms=2.0)
+end
+function read_error_files()
+	n_times_1 = 4
+	n_exps_t = 15
+	n_times_2 = 8
+	n_exps = (n_times_1 + n_times_2)*n_exps_t
+	filenames = Array{String,1}(undef, n_exps) 
+	for i = 1:n_times_1
+		for j = 1:n_exps_t
+			filenames[(i-1)*n_exps_t + j] = string(
+			"../data/rijke_DA/1-to-60/rijke_exp", 
+			string(i+1), "_", string(j), ".jld")
+		end
+	end
+	n_cltd = n_times_1*n_exps_t
+	for i = 1:n_times_2
+		for j = 1:n_exps_t
+			filenames[n_cltd + (i-1)*n_exps_t + j] = string(
+			"../data/rijke_DA/61-to-180/rijke_exp", 
+			string(i+1), "_", string(j), ".jld")
+		end
+	end
+
+	data = load(filenames[1])
+	prd = data["z_prd"]
+	obs = data["z_obs"]
+	n_trj, n_gd, x = size(prd)
+	z_prd = zeros(n_trj, n_gd, n_exps)
+	z_obs = zeros(n_trj, n_exps)
+	z_prd[:,:,1] = prd[:,:,1]
+	z_obs[:,1] = obs[:,1]
+	for k = 2:n_exps 
+		data = load(filenames[k])
+		prd = data["z_prd"]
+		obs = data["z_obs"]
+		z_prd[:,:,k] = prd[:,:,1]
+		z_obs[:,k] = obs[:,1]
+	end
+	
+	fig, ax = subplots(1,1)
+
 	ax.xaxis.set_tick_params(labelsize=24)
 	ax.yaxis.set_tick_params(labelsize=24)
 	ax.set_xlabel("time", fontsize=24)
 	ax.set_ylabel("Prediction error", fontsize=24)
 	ax.grid(true)
+
+	plot_da_err(z_prd,z_obs,fig, ax)
+
 end
-
-
