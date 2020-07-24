@@ -90,6 +90,12 @@ function perturbation(u, s, eps=1.e-6)
 	return (Rijke(u, [beta + eps, tau], 1) - 
 			Rijke(u, [beta - eps, tau], 1))/(2*eps)
 end
+function tau_perturbation(u, s, eps=1.e-6)
+	d, = size(u)
+	beta, tau = s
+	return (Rijke(u, [beta, tau + eps], 1) - 
+			Rijke(u, [beta, tau - eps], 1))/(2*eps)
+end
 
 function dRijke(u, s, eps)
 	d,  = size(u)
