@@ -5,6 +5,9 @@ function plot_adjoint_sensitivities()
 	dJds_avg = zeros(2)
 	dJds_var = zeros(2)
 	dJds_arr = zeros(2,n_files)
+	d = 30 
+	n = 2000
+	vsh_arr = zeros(d, n, n_files)
 	for n = 1:n_files 
 		filename = string("../data/",
 						  "rijke_adjoint_sensitivities/",
@@ -14,9 +17,11 @@ function plot_adjoint_sensitivities()
 
 		X = load(filename)
 		dJds = X["dJds"]
+		vsh = X["vsh"]
 		dJds_arr[:,n] = dJds
 		dJds_avg += dJds/n_files
 		dJds_var += dJds.*dJds/n_files
+		vsh_arr[:,:,n] = vsh
 	end
 	dJds_var .-= dJds_avg.*dJds_avg
 
@@ -37,6 +42,7 @@ function plot_adjoint_sensitivities()
 	ax[2].set_ylabel("Shadowing sensitivities",fontsize=25)
 	ax[2].grid(true)
 	fig.legend(fontsize=25)
+	return vsh_arr, dJds_arr, dJds_avg, dJds_var
 end
 
 #=
