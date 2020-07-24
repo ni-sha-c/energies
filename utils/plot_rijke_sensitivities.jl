@@ -1,26 +1,45 @@
 using JLD
 using PyPlot
-X = load("rijke_shadowing_sens.jld")
+function plot_adjoint_sensitivities()
+	n_files = 1120
+	dJds_avg = zeros(2)
+	dJds_var = zeros(2)
+	dJds_arr = zeros(2,n_files)
+	for n = 1:n_files 
+		filename = string("../data/",
+						  "rijke_adjoint_sensitivities/",
+						  "vsh_and_dJds_",
+						  string(n),
+						  ".jld")
 
-n_arr = X["n"]
-n = length(n_arr)
+		X = load(filename)
+		dJds = X["dJds"]
+		dJds_arr[:,n] = dJds
+		dJds_avg += dJds/n_files
+		dJds_var += dJds.*dJds/n_files
+	end
+	dJds_var .-= dJds_avg.*dJds_avg
 
-dJds = X["dJds"][:,1:n]
-var_dJds = X["var_dJds"][:,1:n]
+	fig, ax = subplots(1,2)
+	ax[1].xaxis.set_tick_params(labelsize=25)
+	ax[1].yaxis.set_tick_params(labelsize=25)
+	ax[2].xaxis.set_tick_params(labelsize=25)
+	ax[2].yaxis.set_tick_params(labelsize=25)
+	
+	ax[1].plot(1:n_files, dJds_arr[1,:], "b.", label=L"$\dfrac{d \langle E_{\rm ac}\rangle}{d \beta}$")
+	ax[2].plot(1:n_files, dJds_arr[2,:], "r.", label=L"$\dfrac{d \langle E_{\rm ac}\rangle}{d \tau}$")
+	ax[1].plot(1:n_files, ones(n_files)*dJds_avg[1],"b--")
+	ax[2].plot(1:n_files, ones(n_files)*dJds_avg[2],"r--")
+	ax[1].set_xlabel("Sample #",fontsize=25)
+	ax[1].set_ylabel("Shadowing sensitivities",fontsize=25)
+	ax[1].grid(true)
+	ax[2].set_xlabel("Sample #",fontsize=25)
+	ax[2].set_ylabel("Shadowing sensitivities",fontsize=25)
+	ax[2].grid(true)
+	fig.legend(fontsize=25)
+end
 
-fig, ax = subplots(1,1)
-ax.xaxis.set_tick_params(labelsize=18)
-ax.yaxis.set_tick_params(labelsize=18)
-
-ax.plot(n_arr*0.01, dJds[1,:], "bo", label=L"$\dfrac{d \langle J_{\rm ac}\rangle}{d \beta}$")
-ax.plot(n_arr*0.01, dJds[2,:], "ro", label=L"$\dfrac{d \langle J_{\rm ray}\rangle}{d \beta}$")
-
-ax.set_xlabel("time segment length",fontsize=18)
-ax.set_ylabel("Shadowing sensitivities",fontsize=18)
-
-fig.legend(fontsize=18)
-ax.grid(true)
-
+#=
 fig1, ax1 = subplots(1,1)
 ax1.xaxis.set_tick_params(labelsize=18)
 ax1.yaxis.set_tick_params(labelsize=18)
@@ -43,4 +62,4 @@ ax2.set_ylabel("Shadowing sensitivities",fontsize=18)
 
 fig2.legend(fontsize=18)
 ax2.grid(true)
-
+=#
