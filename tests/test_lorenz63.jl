@@ -172,7 +172,7 @@ function test_adjoint_lss()
     d = 3
     d_u = 2
     dJ = zeros(d,n+1)
-    dJ[3,:] .= 1.
+    dJ[3,:] .= 1./(n+1)
     n_samples = 10
     dJds = zeros(1,n_samples)
     vsh = zeros(d,n+1,n_samples)

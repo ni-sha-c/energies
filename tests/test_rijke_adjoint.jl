@@ -4,7 +4,7 @@ using JLD
 using OrdinaryDiffEq
 function Rijke_adjoint_sensitivity(n_spe)
     s = [7.0, 0.2]
-    n = 2500
+    n = 2000
     d = N
 
     J_trj = ones(n)
@@ -40,6 +40,7 @@ function Rijke_adjoint_sensitivity(n_spe)
     X_trj = reverse(X_trj, dims=3)
 
     dJ_trj = reverse(dJ_trj, dims=2)
+    dJ_trj /= n
 
     f_trj = reverse(f_trj, dims=2)
     u = Rijke_ODE(u, s, 1)
@@ -48,7 +49,7 @@ function Rijke_adjoint_sensitivity(n_spe)
     f_trj = [f_end f_trj[:,1:end-1]]
 
     y, xi = lss(du_trj, dJ_trj, 
-    zeros(d,n), s, 1, f_trj)
+    zeros(d,n), s, 2, f_trj)
     dJds = compute_sens(y, xi, X_trj, zeros(d,n))
     vsh[:,:] = y
    
@@ -57,7 +58,7 @@ function Rijke_adjoint_sensitivity(n_spe)
              "dJds", dJds, "vsh", vsh)
 end
 function collect_adjoint_sensitivities()
-    pmap(Rijke_adjoint_sensitivity, 1:16)
+    pmap(Rijke_adjoint_sensitivity, 113:224)
 end
 
 

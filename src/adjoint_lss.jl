@@ -71,10 +71,12 @@ function lss(du_trj, X, f, s, d_u, g)
         Q[:,:,i] = Array(A.Q)
         R[:,:,i] = A.R
     	pf_v[i] = dot(v[:,1,i],g[:,i])
-    	v[:,:,i] = v[:,:,i] - (pf_v[i]/
-    						   ff[i]*f[:,i])
+    	v[:,:,i] = v[:,:,i] - (pf_v[i]/ff[i]*f[:,i])
         b[:,:,i] = (Q[:,:,i]')*v[:,:,i]
-    	v[:,:,i] = v[:,:,i] - Q[:,:,i]*b[:,:,i] 
+    	v[:,:,i] = v[:,:,i] - Q[:,:,i]*b[:,:,i]
+	if(i <=5)
+		println(v[1:3,:,i]')
+	end
     	lyap_exps .+= log.(abs.(diag(R[:,:,i])))./n
     end
     println(lyap_exps/0.01)	
