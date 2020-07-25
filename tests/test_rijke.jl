@@ -1,5 +1,7 @@
 include("../examples/rijke.jl")
 include("../src/lss.jl")
+using JLD
+using OrdinaryDiffEq
 function Rijke_tangent_sensitivity(n_spe)
 	s = [7.0, 0.2]
 	n = 2000
@@ -15,7 +17,7 @@ function Rijke_tangent_sensitivity(n_spe)
 	nRunup = 1000000
 	u = Rijke_ODE(rand(d),s,nRunup)
 
-	for i = 2:n
+	for i = 1:n
 		vel_p_i = view(u, 1:2*Ng)
 		dJ_trj[1,1:2*Ng,i] = 0.5*vel_p_i
 		dJ_trj[2,1:Ng,i] = cjpixf
@@ -32,7 +34,7 @@ function Rijke_tangent_sensitivity(n_spe)
 		    ".jld"), "vsh", vsh, "dJds", dJds)
 end
 function collect_sensitivities()
-	pmap(Rijke_tangent_sensitivity, 1:240)
+	pmap(Rijke_tangent_sensitivity, 481:720)
 end
 
 #=
