@@ -1,13 +1,13 @@
 using JLD
 using PyPlot
 function plot_adjoint_sensitivities()
-	n_files = 1120
+	n_files = 960
 	dJds_avg = zeros(2)
 	dJds_var = zeros(2)
 	dJds_arr = zeros(2,n_files)
 	d = 30 
-	n = 2000
-	vsh_arr = zeros(d, n, n_files)
+	nSteps = 2000
+	vsh_arr = zeros(d, nSteps, n_files)
 	for n = 1:n_files 
 		filename = string("../data/",
 						  "rijke_adjoint_sensitivities/",
@@ -18,29 +18,33 @@ function plot_adjoint_sensitivities()
 		X = load(filename)
 		dJds = X["dJds"]
 		vsh = X["vsh"]
+		dJds *= nSteps
 		dJds_arr[:,n] = dJds
-		dJds_avg += dJds/n_files
-		dJds_var += dJds.*dJds/n_files
 		vsh_arr[:,:,n] = vsh
 	end
-	dJds_var .-= dJds_avg.*dJds_avg
-
-	fig, ax = subplots(1,2)
-	ax[1].xaxis.set_tick_params(labelsize=25)
-	ax[1].yaxis.set_tick_params(labelsize=25)
-	ax[2].xaxis.set_tick_params(labelsize=25)
-	ax[2].yaxis.set_tick_params(labelsize=25)
+	indices = -10.0 .<= dJds_arr[1,:] .<= 10.0
+	n_files = sum(indices)
+	dJds_arr = dJds_arr[:, indices]
+	dJds_avg = sum(dJds_arr, dims=2)/n_files
+	dJds_var = sum((dJds_arr .- dJds_avg).^2.0, dims=2)/n_files 
+	fig, ax = subplots(1,1)
+	fig1, ax1 = subplots(1,1)
 	
-	ax[1].plot(1:n_files, dJds_arr[1,:], "b.", label=L"$\dfrac{d \langle E_{\rm ac}\rangle}{d \beta}$")
-	ax[2].plot(1:n_files, dJds_arr[2,:], "r.", label=L"$\dfrac{d \langle E_{\rm ac}\rangle}{d \tau}$")
-	ax[1].plot(1:n_files, ones(n_files)*dJds_avg[1],"b--")
-	ax[2].plot(1:n_files, ones(n_files)*dJds_avg[2],"r--")
-	ax[1].set_xlabel("Sample #",fontsize=25)
-	ax[1].set_ylabel("Shadowing sensitivities",fontsize=25)
-	ax[1].grid(true)
-	ax[2].set_xlabel("Sample #",fontsize=25)
-	ax[2].set_ylabel("Shadowing sensitivities",fontsize=25)
-	ax[2].grid(true)
+	ax.xaxis.set_tick_params(labelsize=25)
+	ax.yaxis.set_tick_params(labelsize=25)
+	ax1.xaxis.set_tick_params(labelsize=25)
+	ax1.yaxis.set_tick_params(labelsize=25)
+	
+	ax.plot(1:n_files, dJds_arr[1,:], "b.", label=L"$\dfrac{d \langle E_{\rm ac}\rangle}{d \beta}$",ms=2.0)
+	ax1.plot(1:n_files, dJds_arr[2,:], "r.", label=L"$\dfrac{d \langle E_{\rm ac}\rangle}{d \tau}$",ms=2.0)
+	ax.plot(1:n_files, ones(n_files)*dJds_avg[1],"b",lw=2.0)
+	ax1.plot(1:n_files, ones(n_files)*dJds_avg[2],"r",lw=2.0)
+	ax.set_xlabel("Sample #",fontsize=25)
+	ax.set_ylabel("Shadowing sensitivities",fontsize=25)
+	ax.grid(true)
+	ax1.set_xlabel("Sample #",fontsize=25)
+	ax1.set_ylabel("Shadowing sensitivities",fontsize=25)
+	ax1.grid(true)
 	fig.legend(fontsize=25)
 	return vsh_arr, dJds_arr, dJds_avg, dJds_var
 end
