@@ -38,7 +38,8 @@ function Rijke_tangent_sensitivity(n_spe)
 	y, xi = lss(du_trj, X_trj, zeros(d,n), s, 3)
 	dJds = compute_sens(y, xi, dJ, f_trj)
 	vsh[:,:] = y
-	save(string("../vsh_and_dJds_
+	save(string("../data/rijke_tangent_sensitivity/",
+		    "vsh_and_dJds_"
 
 
 #=

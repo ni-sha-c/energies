@@ -37,20 +37,26 @@ function Rijke_adjoint_sensitivity(n_spe)
     du_trj = reverse(du_trj, dims=3)
     du_trj = permutedims(du_trj, [2, 1, 3])
 
+
+    u = Rijke_ODE(u, s, 1)
     X_trj = reverse(X_trj, dims=3)
+    X1_end = perturbation(u, s)
+    X2_end = tau_perturbation(u, s)
+    X_trj[1,:,:] = [X1_end X_trj[1,:,1:end-1]]
+    X_trj[2,:,:] = [X2_end X_trj[2,:,1:end-1]]
+
 
     dJ_trj = reverse(dJ_trj, dims=2)
     dJ_trj /= n
 
     f_trj = reverse(f_trj, dims=2)
-    u = Rijke_ODE(u, s, 1)
     f_end = zeros(d)
     f!(f_end, u, s, 1.)
     f_trj = [f_end f_trj[:,1:end-1]]
 
     y, xi = lss(du_trj, dJ_trj, 
     zeros(d,n), s, 2, f_trj)
-    dJds = compute_sens(y, xi, X_trj, zeros(d,n))
+    dJds = compute_sens(y, zeros(n), X_trj, zeros(d,n))
     vsh[:,:] = y
    
     save(string("../data/rijke_adjoint_sensitivity/",
@@ -58,7 +64,7 @@ function Rijke_adjoint_sensitivity(n_spe)
              "dJds", dJds, "vsh", vsh)
 end
 function collect_adjoint_sensitivities()
-    pmap(Rijke_adjoint_sensitivity, 113:224)
+    pmap(Rijke_adjoint_sensitivity, 897:1120)
 end
 
 
