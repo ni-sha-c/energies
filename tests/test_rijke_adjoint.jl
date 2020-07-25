@@ -3,8 +3,8 @@ include("../src/adjoint_lss.jl")
 using JLD
 using OrdinaryDiffEq
 function Rijke_adjoint_sensitivity(n_spe)
-    s = [7.0, 0.2]
-    n = 2000
+    s = [6.8, 0.2]
+    n = 2500
     d = N
 
     J_trj = ones(n)
@@ -64,7 +64,7 @@ function Rijke_adjoint_sensitivity(n_spe)
              "dJds", dJds, "vsh", vsh)
 end
 function collect_adjoint_sensitivities()
-    pmap(Rijke_adjoint_sensitivity, 721:960)
+    pmap(Rijke_adjoint_sensitivity, 1:240)
 end
 
 
