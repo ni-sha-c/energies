@@ -31,7 +31,7 @@ function Rijke_tangent_sensitivity(n_spe)
 		    "vsh_and_dJds_", string(n_spe), 
 		    ".jld"), "vsh", vsh, "dJds", dJds)
 end
-function collect_sensitivity()
+function collect_sensitivities()
 	pmap(Rijke_tangent_sensitivity, 1:240)
 end
 
