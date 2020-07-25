@@ -64,7 +64,7 @@ function Rijke_adjoint_sensitivity(n_spe)
              "dJds", dJds, "vsh", vsh)
 end
 function collect_adjoint_sensitivities()
-    pmap(Rijke_adjoint_sensitivity, 897:1120)
+    pmap(Rijke_adjoint_sensitivity, 721:960)
 end
 
 
