@@ -3,59 +3,57 @@ using PyPlot
 using Distributed
 using SharedArrays
 function plot_optimization_path()
-		filename = string("../data/",
-						  "optimization/",
-						  "beta_dJds",
-						  ".jld")
+		#filename = string("../data/",
+		#				  "optimization/",
+		#				  "beta_dJds",
+		#				  ".jld")
 
-		filename1 = string("../data/",
-						  "optimization/",
-						  "beta_dJds_1",
-						  ".jld")
+		#filename1 = string("../data/",
+		#				  "optimization/",
+		#				  "beta_dJds_1",
+		#				  ".jld")
 
 
 
-		X = load(filename)
-		dJds = X["dJds_path"]
-		beta_path = X["beta_path"]
+		#X = load(filename)
+		#dJds = X["dJds_path"]
+		#beta_path = X["beta_path"]
 		
-		Y = load(filename1)
-		dJds1 = Y["dJds_path"]
-		beta1_path = Y["beta_path"]
+		#Y = load(filename1)
+		#dJds1 = Y["dJds_path"]
+		#beta1_path = Y["beta_path"]
 
 		X = load("../data/optimization/Eac_along_path.jld")
-		beta_path_r = X["beta"]
-		beta1_path_r = X["beta1"]
-		Eac_path = X["Eac"]
-		Eac1_path = X["Eac1"]
+		beta = X["beta"]
+		beta1 = X["beta1"]
+		Eac = X["Eac"]
+		Eac1 = X["Eac1"]
 
-		return beta_path_r, beta1_path_r, Eac_path, Eac1_path
-		#=
 		X = load("../data/attractor/more_les/Eac.jld")
 		Y = load("../data/attractor/more_les/Eac1.jld")
 		Z = load("../data/attractor/Eac.jld")
 		W = load("../data/attractor/Eac_and_beta.jld")
-		Eac1 = X["Eac"]
-		Eac2 = Y["Eac"]
-		beta1 = X["beta"]
-		beta2 = Y["beta"]
-		Eac3 = Z["Eac"]
-		Eac4 = W["Eac"]
-		beta3 = Z["beta"]
-		beta4 = W["beta"]
+		J1 = X["Eac"]
+		J2 = Y["Eac"]
+		s1 = X["beta"]
+		s2 = Y["beta"]
+		J3 = Z["Eac"]
+		J4 = W["Eac"]
+		s3 = Z["beta"]
+		s4 = W["beta"]
 		
-		ll = 5.5
-		ul = 7.4
+		ll = 4.5
+		ul = 7.5
 
-		Eac1 = Eac1[ll .<= beta1 .<= ul]
-		Eac2 = Eac2[ll .<= beta2 .<= ul]
-		Eac3 = Eac3[ll .<= beta3 .<= ul]
-		Eac4 = Eac4[ll .<= beta4 .<= ul]
+		J1 = J1[ll .<= s1 .<= ul]
+		J2 = J2[ll .<= s2 .<= ul]
+		J3 = J3[ll .<= s3 .<= ul]
+		J4 = J4[ll .<= s4 .<= ul]
 	
-		beta1 = beta1[ll .<= beta1 .<= ul]
-		beta2 = beta2[ll .<= beta2 .<= ul]
-		beta3 = beta3[ll .<= beta3 .<= ul]
-		beta4 = beta4[ll .<= beta4 .<= ul]
+		s1 = s1[ll .<= s1 .<= ul]
+		s2 = s2[ll .<= s2 .<= ul]
+		s3 = s3[ll .<= s3 .<= ul]
+		s4 = s4[ll .<= s4 .<= ul]
 
 
 
@@ -63,17 +61,47 @@ function plot_optimization_path()
 		ax.xaxis.set_tick_params(labelsize=25)
 		ax.yaxis.set_tick_params(labelsize=25)
 	
-		ax.plot(beta1, Eac1, "r.",ms=2.0)
-		ax.plot(beta2, Eac2, "r.",ms=2.0)
-		ax.plot(beta3, Eac3, "r.",ms=2.0)
-		ax.plot(beta4, Eac4, "r.",ms=2.0)
-		#=
-		ax.plot(1:n_files, ones(n_files)*dJds_avg[1],"b",lw=2.0)
-	ax.set_xlabel("Sample #",fontsize=25)
-	ax.set_ylabel("Shadowing sensitivities",fontsize=25)
-	=#
-	ax.grid(true)
+		ax.plot(s1, J1, "r.",ms=3.0)
+		ax.plot(s2, J2, "r.",ms=3.0)
+		ax.plot(s3, J3, "r.",ms=3.0)
+		ax.plot(s4, J4, "r.",ms=3.0)
+		
+		ax.plot(beta[1:6], Eac[1:6], "bx", ms=8.0)
+		ax.plot(beta1[1:6], Eac1[1:6], "gx", ms=8.0)
+
+		
+		ax.grid(true)
+		ax.set_xlabel(L"$\beta$", fontsize=25)
+		ax.set_ylabel("acoustic energy", fontsize=25)
+
+
+		ll = 6.0
+		ul = 7.3
+
+		J1 = J1[ll .<= s1 .<= ul]
+		J2 = J2[ll .<= s2 .<= ul]
+		J3 = J3[ll .<= s3 .<= ul]
+		J4 = J4[ll .<= s4 .<= ul]
 	
-	return beta, dJds
-	=#
+		s1 = s1[ll .<= s1 .<= ul]
+		s2 = s2[ll .<= s2 .<= ul]
+		s3 = s3[ll .<= s3 .<= ul]
+		s4 = s4[ll .<= s4 .<= ul]
+
+
+
+
+		ax_in = fig.add_axes([0.3, 0.5, 0.3, 0.35])
+		ax_in.plot(s1, J1, "r.",ms=3.0)
+		ax_in.plot(s2, J2, "r.",ms=3.0)
+		ax_in.plot(s3, J3, "r.",ms=3.0)
+		ax_in.plot(s4, J4, "r.",ms=3.0)
+		ax_in.plot(beta[3:5], Eac[3:5], "bx", ms=8.0)
+		ax_in.plot(beta1[1], Eac1[1], "gx", ms=8.0)
+
+	
+		ax_in.grid(true)
+		ax_in.xaxis.set_tick_params(labelsize=18)
+		ax_in.yaxis.set_tick_params(labelsize=18)
+
 end
