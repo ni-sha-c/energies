@@ -31,14 +31,14 @@ function Rijke_tangent_sensitivity(beta)
 	return dJds[1]
 end
 function average_sensitivity(beta)
-	n_samples = 1
+	n_samples = 100
 	dJds_avg = @distributed (+) for i = 1:n_samples
         Rijke_tangent_sensitivity(beta)
 	end
 	dJds_avg /= n_samples
 end
 function optimize()
-    nNewton = 1
+    nNewton = 20
     beta_path = zeros(nNewton)
     dJds = zeros(nNewton)
     gamma = 0.1
@@ -49,7 +49,7 @@ function optimize()
        	beta = beta - gamma*dJds[nN]
 	beta_path[nN] = beta
     end
-    save("../data/param_optim/beta_dJds.jld",
+    save("../data/param_optim/beta_dJds_1.jld",
 	 "beta_path", beta_path,
 	 "dJds_path", dJds)
 end
