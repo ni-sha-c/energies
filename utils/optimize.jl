@@ -56,10 +56,15 @@ function optimize()
 end
 function compute_Eac(beta)
 	nRunup = 1000000
+	s = [beta, 0.2]
+	d = N
 	u = Rijke_ODE(rand(d),s,nRunup)
 	nSteps = 20000
 	Eac = 0.
 	for i = 1:nSteps
+		if(i==1000)
+			println("executing step")
+		end
 		u = Rijke_ODE(u, s, 1)
 		Eac += 0.25*norm(u[1:2*Ng])^2.0/nSteps
 	end
@@ -73,12 +78,13 @@ function compute_Eac_along_path()
 	beta1 = X["beta_path"]
 	n1, =  size(beta1)
 	beta = Y["beta_path"]
-	beta = [beta1; beta]
-	n, = size(beta)
+	beta2 = [beta1; beta]
+	n, = size(beta2)
 	Eac = SharedArray{Float64}(n)
-	@distributed for i=1:n
-		Eac[i] = compute_Eac(beta[i])
+	t = @distributed for i=1:n
+		Eac[i] = compute_Eac(beta2[i])
 	end
+	wait(t)
 	save("../data/param_optim/Eac_along_path.jld",
 		"Eac1", Eac[1:n1], 
 		"Eac", Eac[n1+1:end],
