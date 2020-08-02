@@ -172,8 +172,8 @@ function test_adjoint_lss()
     d = 3
     d_u = 2
     dJ = zeros(d,n+1)
-    dJ[3,:] .= 1./(n+1)
-    n_samples = 10
+    dJ[3,:] .= 1.0/(n+1)
+    n_samples = 100
     dJds = zeros(1,n_samples)
     vsh = zeros(d,n+1,n_samples)
     for i=1:n_samples
@@ -188,10 +188,11 @@ function test_adjoint_lss()
 		X = reshape(X, 1, d, n+1)
     	f = zeros(d,n+1)
     	J = u_trj[:,3]
-    	y, xi = lss(duT_trj, dJ, f, s, d_u, g)
+    	y, xi = lss(duT_trj, dJ, f, s, 2, g)
     	vsh[:,:,i] = y
     	u_init .= reshape(u_trj[1,:],3,1)
-		dJds[:,i] = compute_sens(y, xi, X, f)
+		dJds[:,i] = n*compute_sens(y, xi, X, f)
+		@show dJds[:,i]
     end
     #@test isapprox((sum(dJds)/n_samples),1.0,rtol=0.1)  
     return vsh, dJds

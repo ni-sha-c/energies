@@ -14,8 +14,7 @@ function lsssolve(R, b, vf, Qf)
 	pf_Q = [Qf zeros(d_u,1)][:]
 	B = sparse([Array(B); pf_Q'])
     BB = B*transpose(B)
-	b1 = [b[:]; -vf]
-
+	b1 = [b[:]; vf]
 	a = -transpose(B)*(BB\b1[:])
     a = reshape(a, d_u, n+1)[:,1:end-1]
 	return a

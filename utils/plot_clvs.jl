@@ -1,11 +1,12 @@
-include("rijke.jl")
-include("clvs.jl")
+include("../examples/rijke.jl")
+include("../src/clvs.jl")
+using OrdinaryDiffEq
 using PyPlot	
 	s = [7.0, 0.2]
 	#n = 100000
 	n = 50000
 	d = N
-	nRunup = 40000
+	nRunup = 400000
 	u = Rijke(rand(d),s,nRunup)
 	du_trj = zeros(d,d,n)
 	duT_trj = zeros(d,d,n)
@@ -17,8 +18,8 @@ using PyPlot
 		u .= Rijke(u, s, 1)
 	end
 	d_u = 20
-	les, tan_clvs = clvs(du_trj, d_u, zeros(d,n))
-	les1, adj_clvs = clvs(duT_trj, d_u, zeros(d,n))
+	les, tan_clvs = clvs(du_trj, d_u)
+	les1, adj_clvs = clvs(duT_trj, d_u)
 
 	tan_angles = zeros(d_u, d_u, n)
 	adj_angles = zeros(d_u, d_u, n)
@@ -50,46 +51,46 @@ using PyPlot
 	
 
 	fig, ax = subplots(1,1)
-	ax.xaxis.set_tick_params(labelsize=18)
-	ax.yaxis.set_tick_params(labelsize=18)
+	ax.xaxis.set_tick_params(labelsize=25)
+	ax.yaxis.set_tick_params(labelsize=25)
 	angle_plot = ax.matshow(mean_tan_angles)
 	cbar = fig.colorbar(angle_plot)
-	cbar.ax.tick_params(labelsize=18)
+	cbar.ax.tick_params(labelsize=25)
 	fig2, ax2 = subplots(1,1)
-	ax2.xaxis.set_tick_params(labelsize=18)
-	ax2.yaxis.set_tick_params(labelsize=18)
+	ax2.xaxis.set_tick_params(labelsize=25)
+	ax2.yaxis.set_tick_params(labelsize=25)
 	angle_plot2 = ax2.matshow(mean_adj_angles)
 	cbar = fig2.colorbar(angle_plot2)
-	cbar.ax.tick_params(labelsize=18)
+	cbar.ax.tick_params(labelsize=25)
 
 
 	fig1, ax1 = subplots(1,1)
-	ax1.xaxis.set_tick_params(labelsize=18)
-	ax1.yaxis.set_tick_params(labelsize=18)
+	ax1.xaxis.set_tick_params(labelsize=25)
+	ax1.yaxis.set_tick_params(labelsize=25)
 	ax1.set_title(L"Probability distribution of 
 				  angles between $V^1$ and $V^2$", 
-				  fontsize=18)
+				  fontsize=25)
 	ax1.hist(acos.(tan_angles[1,2,:])*180/pi,
 			 density=true,bins=100)
 	# minimum angle between 1 and 2 is 15.6 degrees
-	ax1.set_xlabel("Angle in degrees",fontsize=18)
+	ax1.set_xlabel("Angle in degrees",fontsize=25)
 	ax1.grid(true)
 	fig3, ax3 = subplots(1,1)
-	ax3.xaxis.set_tick_params(labelsize=18)
-	ax3.yaxis.set_tick_params(labelsize=18)
+	ax3.xaxis.set_tick_params(labelsize=25)
+	ax3.yaxis.set_tick_params(labelsize=25)
 	ax3.set_title(L"Probability distribution of 
 				  angles between $W^1$ and $W^2$", 
-				  fontsize=18)
+				  fontsize=25)
 	ax3.hist(acos.(adj_angles[1,2,:])*180/pi,
 			 density=true,bins=100)
 	# minimum angle between 1 and 2 is 4 degrees
-	ax3.set_xlabel("Angle in degrees",fontsize=18)
+	ax3.set_xlabel("Angle in degrees",fontsize=25)
 	ax3.grid(true)
 
 	fig4, ax4 = subplots(1,1)
-	ax4.xaxis.set_tick_params(labelsize=18)
-	ax4.yaxis.set_tick_params(labelsize=18)
+	ax4.xaxis.set_tick_params(labelsize=25)
+	ax4.yaxis.set_tick_params(labelsize=25)
 	angle_plot4 = ax4.matshow(mean_tan_adj_angles)
 	cbar = fig4.colorbar(angle_plot4)
-	cbar.ax.tick_params(labelsize=18)
+	cbar.ax.tick_params(labelsize=25)
 

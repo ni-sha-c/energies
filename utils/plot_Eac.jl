@@ -1,6 +1,6 @@
 include("../examples/rijke.jl")
 include("../src/clvs.jl")
-#using PyPlot
+using PyPlot
 using OrdinaryDiffEq
 using LinearAlgebra
 using JLD
@@ -51,12 +51,34 @@ function plot_acoustic_energy_colored()
 	beta3 = Z["beta"]
 	beta4 = W["beta"]
 
+    fig1, ax1 = subplots(1,1)
+	ax1.plot(beta1, les1[1,:], ".-")
+	ax1.plot(beta1, les1[2,:], ".-")
+	ax1.plot(beta1, les1[3,:], ".-")
+    ax1.xaxis.set_tick_params(labelsize=28)
+    ax1.yaxis.set_tick_params(labelsize=28)
+    ax1.set_xlabel(L"$\beta$",fontsize=28)
+    ax1.set_ylabel(L"$\lambda$",fontsize=28)
+	grid(true)
+
+    fig2, ax2 = subplots(1,1)
+	ax2.plot(beta2, les2[1,:], ".-")
+	ax2.plot(beta2, les2[2,:], ".-")
+	ax2.plot(beta2, les2[3,:], ".-")
+    ax2.xaxis.set_tick_params(labelsize=28)
+    ax2.yaxis.set_tick_params(labelsize=28)
+    ax2.set_xlabel(L"$\beta$",fontsize=28)
+    ax2.set_ylabel(L"$\lambda$",fontsize=28)
+	grid(true)
+
+
+
 	b_c_ll = 6.2
-	b_c_ul = 7.4
+	b_c_ul = 7.3
 	b_qp_ll_1 = 5.0	
 	b_qp_ul_1 = 6.2
-	b_qp_ll_2 = 7.4
-	b_qp_ul_2 = 8.0
+	b_qp_ll_2 = 5.0
+	b_qp_ul_2 = 6.2
 
 	beta1_c = beta1[b_c_ll .< beta1 .< b_c_ul]
 	chaotic_Eac1 = Eac1[b_c_ll .< beta1 .< b_c_ul]
@@ -108,31 +130,33 @@ function plot_acoustic_energy_colored()
 	ax.plot(beta4_qp_2, qp2_Eac4, "g.")
 
 
+	ax_in = fig.add_axes([0.2,0.75,0.15,0.1])
+	ax_in.plot(beta1, Eac1, "b.")
+    ax_in.plot(beta2, Eac2, "b.")
+    ax_in.plot(beta1_c, chaotic_Eac1, "r.")
+    ax_in.plot(beta2_c, chaotic_Eac2, "r.")
+	ax_in.plot(beta1_qp_1, qp1_Eac1, "g.")
+	ax_in.plot(beta1_qp_2, qp2_Eac1, "g.")
+	ax_in.plot(beta2_qp_1, qp1_Eac2, "g.")
+	ax_in.plot(beta2_qp_2, qp2_Eac2, "g.")
+	ax_in.plot(beta3, Eac3, "b.")
+    ax_in.plot(beta4, Eac4, "b.")
+    ax_in.plot(beta3_c, chaotic_Eac3, "r.")
+    ax_in.plot(beta4_c, chaotic_Eac4, "r.")
+	ax_in.plot(beta3_qp_1, qp1_Eac3, "g.")
+	ax_in.plot(beta3_qp_2, qp2_Eac3, "g.")
+	ax_in.plot(beta4_qp_1, qp1_Eac4, "g.")
+	ax_in.plot(beta4_qp_2, qp2_Eac4, "g.")
+	ax_in.set_xlim([6.6,7.35])
+	ax_in.set_ylim([17,28])
 
-    ax.xaxis.set_tick_params(labelsize=25)
-    ax.yaxis.set_tick_params(labelsize=25)
-    ax.set_xlabel(L"$\beta$",fontsize=25)
-    ax.set_ylabel(L"$<E_{\rm ac}>$",fontsize=25)
-	grid(true)
-	#=
-    fig1, ax1 = subplots(1,1)
-	ax1.plot(beta1, les1[1,:], ".-")
-	ax1.plot(beta1, les1[2,:], ".-")
-	ax1.plot(beta1, les1[3,:], ".-")
-    ax1.xaxis.set_tick_params(labelsize=25)
-    ax1.yaxis.set_tick_params(labelsize=25)
-    ax1.set_xlabel(L"$\beta$",fontsize=25)
-    ax1.set_ylabel(L"$\lambda$",fontsize=25)
-	grid(true)
 
-    fig2, ax2 = subplots(1,1)
-	ax2.plot(beta2, les2[1,:], ".-")
-	ax2.plot(beta2, les2[2,:], ".-")
-	ax2.plot(beta2, les2[3,:], ".-")
-    ax2.xaxis.set_tick_params(labelsize=25)
-    ax2.yaxis.set_tick_params(labelsize=25)
-    ax2.set_xlabel(L"$\beta$",fontsize=25)
-    ax2.set_ylabel(L"$\lambda$",fontsize=25)
-	grid(true)
-	=#
+	ax_in.xaxis.set_tick_params(labelsize=18)
+    ax_in.yaxis.set_tick_params(labelsize=18)
+	ax_in.grid(true)
+    ax.xaxis.set_tick_params(labelsize=28)
+    ax.yaxis.set_tick_params(labelsize=28)
+    ax.set_xlabel(L"$\beta$",fontsize=28)
+    ax.set_ylabel(L"$<J_{\rm ac}>$",fontsize=28)
+	ax.grid(true)
 end
