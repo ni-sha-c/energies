@@ -13,7 +13,7 @@ function Rijke_tangent_sensitivity(n_spe)
 	X_trj = zeros(d,n)
 	
 	dJds = zeros(2)
-	vsh = zeros(d, n)
+	#vsh = zeros(d, n)
 	nRunup = 1000000
 	u = Rijke_ODE(rand(d),s,nRunup)
 
@@ -26,15 +26,15 @@ function Rijke_tangent_sensitivity(n_spe)
 		du_trj[:,:, i] = dRijke(u, s, 1.e-6)
 		u = Rijke_ODE(u, s, 1)
 	end
-	y, xi = lss(du_trj, X_trj, f_trj, s, 2)
+	y, xi = lss(du_trj, X_trj, zeros(d,n), s, 2)
 	dJds = compute_sens(y, xi, dJ_trj, f_trj)
-	vsh[:,:] = y
+	#vsh[:,:] = y
 	save(string("../data/rijke_tangent_sensitivity/",
 		    "vsh_and_dJds_", string(n_spe), 
-		    ".jld"), "vsh", vsh, "dJds", dJds)
+		    ".jld"), "dJds", dJds)
 end
 function collect_sensitivities()
-	pmap(Rijke_tangent_sensitivity, 241:480)
+	pmap(Rijke_tangent_sensitivity, 5001:6000)
 end
 
 #=
