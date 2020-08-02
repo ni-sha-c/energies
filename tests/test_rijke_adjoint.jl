@@ -3,8 +3,8 @@ include("../src/adjoint_lss.jl")
 using JLD
 using OrdinaryDiffEq
 function Rijke_adjoint_sensitivity(n_spe)
-    s = [6.8, 0.2]
-    n = 2500
+    s = [6.9, 0.2]
+    n = 2000
     d = N
 
     J_trj = ones(n)
@@ -14,7 +14,7 @@ function Rijke_adjoint_sensitivity(n_spe)
     du_trj = zeros(d, d, n)
     
     dJds = zeros(2)
-    vsh = zeros(d, n)
+    #vsh = zeros(d, n)
     nRunup = 1000000
     u = Rijke_ODE(rand(d),s,nRunup)
     
@@ -40,10 +40,10 @@ function Rijke_adjoint_sensitivity(n_spe)
 
     u = Rijke_ODE(u, s, 1)
     X_trj = reverse(X_trj, dims=3)
-    X1_end = perturbation(u, s)
-    X2_end = tau_perturbation(u, s)
-    X_trj[1,:,:] = [X1_end X_trj[1,:,1:end-1]]
-    X_trj[2,:,:] = [X2_end X_trj[2,:,1:end-1]]
+    #X1_end = perturbation(u, s)
+    #X2_end = tau_perturbation(u, s)
+    #X_trj[1,:,:] = [X1_end X_trj[1,:,1:end-1]]
+    #X_trj[2,:,:] = [X2_end X_trj[2,:,1:end-1]]
 
 
     dJ_trj = reverse(dJ_trj, dims=2)
@@ -57,14 +57,14 @@ function Rijke_adjoint_sensitivity(n_spe)
     y, xi = lss(du_trj, dJ_trj, 
     zeros(d,n), s, 2, f_trj)
     dJds = compute_sens(y, zeros(n), X_trj, zeros(d,n))
-    vsh[:,:] = y
+    #vsh[:,:] = y
    
     save(string("../data/rijke_adjoint_sensitivity/",
         "vsh_and_dJds_", string(n_spe), ".jld"),
-             "dJds", dJds, "vsh", vsh)
+             "dJds", dJds)
 end
 function collect_adjoint_sensitivities()
-    pmap(Rijke_adjoint_sensitivity, 241:480)
+    pmap(Rijke_adjoint_sensitivity, 7001:10000)
 end
 
 
