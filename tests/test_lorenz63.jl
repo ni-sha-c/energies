@@ -1,7 +1,7 @@
 include("../examples/lorenz63.jl")
 include("../src/clvs.jl")
-#include("../src/lss.jl")
-include("../src/adjoint_lss.jl")
+include("../src/lss.jl")
+#include("../src/adjoint_lss.jl")
 using Test
 using DiffEqSensitivity, OrdinaryDiffEq, Zygote
 function test_dlorenz63()
@@ -42,28 +42,27 @@ end
 function test_lss()
     s = [10., 28., 8/3]
     m = 1
-    n = 5000
+    n = 3000
     n_runup = 5000
     u0 = rand(3,m)
     u_init = lorenz63(u0, s, n)[end,:,:]
     d = 3
     d_u = 2
-    dJ = zeros(d,n+1)
-    dJ[3,:] .= 1.
+    dJ = zeros(1,d,n+1)
+    dJ[1,3,:] .= 1.
     n_samples = 100
-    dJds = zeros(n_samples)
+    dJds = zeros(1,n_samples)
     vsh = zeros(d,n+1,n_samples)
     for i=1:n_samples
     	println("Starting LSS, sample ", i)
     	u_trj = lorenz63(u_init, s, n)[:,:,1]
     	du_trj = dlorenz63(u_trj, s)
         X = perturbation(u_trj,s) #ith col in T_{u_{i+1}} M
-    	#f = vectorField(u_trj,s)	
-    	f = zeros(d,n+1)
-    	J = u_trj[:,3]
-    	y, dJds[i] = lss(u_trj, du_trj, X, f, J, 
-    					 dJ, s, d_u)
-    	println(dJds[i])
+    	f = vectorField(u_trj,s)	
+    	#f = zeros(d,n+1)
+    	y, xi = lss(du_trj, X, f, s, d_u)
+		dJds[:,i] = compute_sens(y, xi, dJ, f)
+    	@show dJds[i]
     	vsh[:,:,i] = y
     	u_init .= reshape(u_trj[end,:],3,1)
     end

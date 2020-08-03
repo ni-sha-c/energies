@@ -3,7 +3,7 @@ include("../examples/lorenz63.jl")
 using PyPlot
 using JLD
 function plot_sensitivity()
-	vsh, dJds = test_adjoint_lss()
+	vsh, dJds = test_lss()
 	dJds = dJds[:]
 	fig, ax = subplots(1,1)
 	fig1, ax1 = subplots(1,1)
@@ -16,12 +16,12 @@ function plot_sensitivity()
 	ax.plot(n, vsh[:,2], label=L"v_{\rm sh,y}")
 	ax.plot(n, vsh[:,3], label=L"v_{\rm sh,z}")
 	ax.set_xlabel("time",fontsize=28)
-	ax.set_ylabel("adjoint shadowing components",
+	ax.set_ylabel("tangent shadowing components",
 					  fontsize=28)
 	ax.xaxis.set_tick_params(labelsize=28)
 	ax.yaxis.set_tick_params(labelsize=28)
 	fig.legend(fontsize=28)
-	ax1.set_ylabel("adjoint sensitivities",fontsize=28)
+	ax1.set_ylabel("tangent sensitivities",fontsize=28)
 	ax1.set_xlabel("sample number",fontsize=28)
 	ax1.set_title("trajectory length = 3000", fontsize=28)
 	ax1.xaxis.set_tick_params(labelsize=28)
