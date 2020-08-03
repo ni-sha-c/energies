@@ -2,7 +2,8 @@ include("../examples/rijke.jl")
 using OrdinaryDiffEq
 using DiffEqSensitivity, Zygote
 using JLD
-using PyPlot
+#using PyPlot
+using SharedArrays
 function compute_perturbations()
 d = N
 u = rand(d)
@@ -52,14 +53,15 @@ function compute_ad_pert()
 	u = rand(d)
 	eps = 0.
 	ad_norm = zeros(nSteps)
-	ad = zeros(d)
 	for n = 1:nSteps
 		@show n
+		ad = SharedArray{Float64}(d)
 		ad .= 0.
-		for j = 1:d
+		ans = @distributed for j = 1:d
 			ad[j] = Zygote.gradient(
 									eps -> ad_solve(u, eps, n, j), eps)[1]
 		end
+		wait(ans)
 		ad_norm[n] = norm(ad)
 	end
 	save("../data/rijke_perturbations/ad_norms.jld",

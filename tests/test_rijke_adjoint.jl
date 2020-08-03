@@ -3,7 +3,7 @@ include("../src/adjoint_lss.jl")
 using JLD
 using OrdinaryDiffEq
 function Rijke_adjoint_sensitivity(n_spe)
-    s = [6.9, 0.2]
+    s = [7.0, 0.2]
     n = 2000
     d = N
 
