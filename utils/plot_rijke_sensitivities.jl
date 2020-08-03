@@ -207,7 +207,7 @@ function plot_adjoint_sens_cum_avg()
 	for n = 1:n_files 
 		filename = string("../data/",
 						  "rijke_adjoint_sensitivities/",
-						  "6.8new/",
+						  "7.0new/",
 						  "vsh_and_dJds_",
 						  string(n),
 						  ".jld")
@@ -239,7 +239,7 @@ function plot_adjoint_sens_cum_avg()
 	ax.plot(T*(1:n_files), ones(n_files)*dJds_avg[1],"r",lw=2.0)
 	ax1.plot(T*(1:n_files), ones(n_files)*dJds_avg[2],"g",lw=2.0)
 
-	ax.set_ylim([-4.9,-3.1])
+	#ax.set_ylim([-4.9,-3.1])
 	ax1.set_ylim([100,200])
 	ax.set_xlabel("Time",fontsize=28)
 	ax.set_ylabel(L"$\dfrac{d\langle J_{\rm ac}\rangle}{d\beta}$",fontsize=28)
