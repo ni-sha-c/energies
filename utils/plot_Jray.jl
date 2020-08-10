@@ -19,7 +19,7 @@ function compute_rayleigh_criterion(n_samples)
     	u = Rijke_ODE(rand(N), s, nRunup)
     	for j = 1:nSteps    
         	u = Rijke_ODE(u, s, 1)
-        	Jray[i] += sum(u[1:Ng].*cjpixf)/nSteps
+			Jray[i] += 0.5*sum(u[Ng+1:2*Ng].*zetaj.*u[Ng+1:2*Ng])/nSteps
     	end
     	@show Jray[i]
     end

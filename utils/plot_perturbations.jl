@@ -70,6 +70,8 @@ function plot_perturbations()
 	v_norm = X["v_norm"]
 	w_norm = X["w_norm"]
 	fd_norm = X["fd_norm"]
+	X = load("../data/rijke_perturbations/ad_norms.jld")
+	ad_norm = X["ad_norm"]
 	nSteps = size(v_norm)[1]
 	fig, ax = subplots(1,1)
 	ax.semilogy(dt*(1:nSteps), v_norm, ".", ms=4.0,
@@ -78,6 +80,9 @@ function plot_perturbations()
 				label="adjoint")
 	ax.semilogy(dt*(1:nSteps), fd_norm, "P", ms=4.0,
 				label="FD")
+	ax.semilogy(dt*(1:nSteps), fd_norm, "1", ms=10.0,
+				label="AD")
+
 	ax.xaxis.set_tick_params(labelsize=28)
 	ax.yaxis.set_tick_params(labelsize=28)
 	ax.set_xlabel("time", fontsize=28)
@@ -88,6 +93,7 @@ function plot_perturbations()
 	lgnd.legendHandles[1]._legmarker.set_markersize(20)
 	lgnd.legendHandles[2]._legmarker.set_markersize(20)
 	lgnd.legendHandles[3]._legmarker.set_markersize(20)
+	lgnd.legendHandles[4]._legmarker.set_markersize(20)
 end
 
 
