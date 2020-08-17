@@ -1,7 +1,7 @@
 include("../examples/lorenz63.jl")
 include("../src/clvs.jl")
-include("../src/lss.jl")
-#include("../src/adjoint_lss.jl")
+#include("../src/lss.jl")
+include("../src/adjoint_lss.jl")
 using Test
 using DiffEqSensitivity, OrdinaryDiffEq, Zygote
 function test_dlorenz63()

@@ -29,13 +29,13 @@ function compute_rayleigh_criterion(n_samples)
 end
 function plot_rayleigh()
 	filename = string("../data/attractor/",
-					  "Jray.jld")
+					  "Jray_actual.jld")
 	X = load(filename)
 	Jray = X["Jray"]
 	beta = X["beta"]
 	fig, ax = subplots(1,1)
 	ax.plot(beta, Jray, "b.", ms=4.0)
-	ax_in = fig.add_axes([0.6,0.6,0.2,0.2])
+	ax_in = fig.add_axes([0.2,0.6,0.2,0.2])
 	ax_in.plot(beta[6.7 .<= beta .<= 7.3], 
 			Jray[6.7 .<= beta .<= 7.3], "b.",ms=4.0)
 	ax.xaxis.set_tick_params(labelsize=25)

@@ -8,7 +8,7 @@ function lsssolve(R, b, vf, Qf)
     D = (BlockArray{Float64}(zeros(ndu,ndu),
                d_u*ones(Int64,n),
                d_u*ones(Int64,n)))
-    [D[Block(i,i)] = R[:,:,i] for i =1:n]
+    [D[Block(i,i)] = R[:,:,i+1] for i =1:n-1]
     D = sparse([Array(D) zeros(ndu, d_u)])
     B = D - eye
 	pf_Q = [Qf zeros(d_u,1)][:]
