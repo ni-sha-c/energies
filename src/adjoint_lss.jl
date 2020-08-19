@@ -65,8 +65,8 @@ function lss(du_trj, X, f, s, d_u, g)
     				X[:,i-1]
     	Q[:,:,i] = du_trj[:,:,i-1]*Q[:,:,i-1]
     	pf_Q[:,:,i] = Q[:,:,i]'*g[:,i]
-    	[Q[:,j,i] = Q[:,j,i] - pf_Q[j,1,i]*f[:,i]/
-    					ff[i] for j=1:d_u]
+    	#[Q[:,j,i] = Q[:,j,i] - pf_Q[j,1,i]*f[:,i]/
+    	#				ff[i] for j=1:d_u]
     	A = qr!(Q[:,:,i])
         Q[:,:,i] = Array(A.Q)
         R[:,:,i] = A.R
@@ -74,37 +74,26 @@ function lss(du_trj, X, f, s, d_u, g)
     	v[:,:,i] = v[:,:,i] - (pf_v[i]/ff[i]*f[:,i])
         b[:,:,i] = (Q[:,:,i]')*v[:,:,i]
     	v[:,:,i] = v[:,:,i] - Q[:,:,i]*b[:,:,i]
-	if(i <=5)
-		println(v[1:3,:,i]')
-	end
-    	lyap_exps .+= log.(abs.(diag(R[:,:,i])))./n
+	lyap_exps .+= log.(abs.(diag(R[:,:,i])))./n
     end
-    println(lyap_exps/0.01)	
     
     b = reshape(collect(b),d_u, n)
-    println("Solving the least squares problem... ")
-    @time a = lsssolve(R,b,sum(pf_v),pf_Q[:,1,:])
-    println("Computing shadowing direction...")
+    a = lsssolve(R,b,sum(pf_v),pf_Q[:,1,:])
     v = reshape(collect(v),d,n)
     vsh = zeros(d, n)
     xi = zeros(n)
     vsh[:,1] = Q[:,:,1]*reshape(a[:,1], d_u, 1) + 
     			  v[:,1]
     for i = 2:n
-    	vsh[:,i] = v[:,i] + Q[:,:,i]*reshape(a[:,i],d_u,
-    				1)  
-    	xi[i] = xi[i-1] + dot(-vsh[:,i] + du_trj[:,:,i-1]*
-    				vsh[:,i-1] + X[:,i-1], f[:,i])/ff[i]
+    	vsh[:,i] = v[:,i] + Q[:,:,i]*reshape(a[:,i],d_u,1)  
     end
     return vsh, xi
 end
 function compute_sens(vsh, xi, dJ, f)
-    println("Computing sensitivity...")
     m, d, n = size(dJ)
     dJds = zeros(m)
     for i = 1:n
-    	dJds .= dJds .+ dJ[:,:,i]*(vsh[:,i] .+ 
-    				 xi[i]*f[:,i])/n 
+    	dJds .= dJds .+ dJ[:,:,i]*vsh[:,i] 
     end
     return dJds
 end

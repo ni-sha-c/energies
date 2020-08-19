@@ -190,7 +190,7 @@ function test_adjoint_lss()
     	y, xi = lss(duT_trj, dJ, f, s, 2, g)
     	vsh[:,:,i] = y
     	u_init .= reshape(u_trj[1,:],3,1)
-		dJds[:,i] = n*compute_sens(y, xi, X, f)
+		dJds[:,i] = compute_sens(y, xi, X, f)
 		@show dJds[:,i]
     end
     #@test isapprox((sum(dJds)/n_samples),1.0,rtol=0.1)  

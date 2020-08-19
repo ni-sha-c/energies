@@ -11,11 +11,11 @@ function lsssolve(R, b, vf, Qf)
     [D[Block(i,i)] = R[:,:,i+1] for i =1:n-1]
     D = sparse([Array(D) zeros(ndu, d_u)])
     B = D - eye
-	pf_Q = [Qf zeros(d_u,1)][:]
-	B = sparse([Array(B); pf_Q'])
+    pf_Q = [Qf zeros(d_u,1)][:]
+    B = sparse([Array(B); pf_Q'])
     BB = B*transpose(B)
-	b1 = [b[:]; vf]
-	a = -transpose(B)*(BB\b1[:])
+    b1 = [b[:]; vf]
+    a = -transpose(B)*(BB\b1[:])
     a = reshape(a, d_u, n+1)[:,1:end-1]
-	return a
+    return a
 end

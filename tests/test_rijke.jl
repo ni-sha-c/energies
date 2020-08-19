@@ -3,7 +3,7 @@ include("../src/lss.jl")
 using JLD
 using OrdinaryDiffEq
 function Rijke_tangent_sensitivity(n_spe)
-	s = [7.0, 0.2]
+	s = [6.9, 0.2]
 	n = 2000
 	d = N
 
@@ -34,7 +34,7 @@ function Rijke_tangent_sensitivity(n_spe)
 		    ".jld"), "dJds", dJds)
 end
 function collect_sensitivities()
-	pmap(Rijke_tangent_sensitivity, 5001:6000)
+	pmap(Rijke_tangent_sensitivity, 6601:10000)
 end
 
 #=
