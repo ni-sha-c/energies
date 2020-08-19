@@ -58,7 +58,7 @@ function Rijke_adjoint_sensitivity(n_spe)
     zeros(d,n), s, 2, f_trj)
     dJds = compute_sens(y, zeros(n), X_trj, zeros(d,n))
     #vsh[:,:] = y
-   
+	@show dJds   
     save(string("../data/rijke_adjoint_sensitivity/",
         "vsh_and_dJds_", string(n_spe), ".jld"),
              "dJds", dJds)
