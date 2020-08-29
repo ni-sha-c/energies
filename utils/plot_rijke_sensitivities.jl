@@ -82,7 +82,7 @@ function plot_tangent_sens_cum_avg()
 	return dJds_arr
 end
 function plot_adjoint_sens_cum_avg()
-	n_files = 10000
+	n_files = 1000
 	dJds_avg = zeros(2)
 	dJds_var = zeros(2)
 	dJds_arr = zeros(2,n_files)
@@ -99,13 +99,13 @@ function plot_adjoint_sens_cum_avg()
 		X = load(filename)
 		dJds = X["dJds"]
 		#vsh = X["vsh"]
-		dJds *= nSteps
+		#dJds *= nSteps
 		dJds_arr[:,n] = dJds
 		#vsh_arr[:,:,n] = vsh
 	end
-	#indices = -20.0 .<= dJds_arr[1,:] .<= 20.0
-	#n_files = sum(indices)
-	#dJds_arr = dJds_arr[:, indices]
+	indices = -100.0 .<= dJds_arr[1,:] .<= 100.0
+	n_files = sum(indices)
+	dJds_arr = dJds_arr[:, indices]
 	dJds_avg = sum(dJds_arr, dims=2)/n_files
 	dJds_var = sum((dJds_arr .- dJds_avg).^2.0, dims=2)/n_files 
 	fig, ax = subplots(1,1)
@@ -124,7 +124,7 @@ function plot_adjoint_sens_cum_avg()
 	ax1.plot(T*(1:n_files), ones(n_files)*dJds_avg[2],"g",lw=2.0)
 
 	#ax.set_ylim([-4.9,-3.1])
-	ax1.set_ylim([100,200])
+	#ax1.set_ylim([100,200])
 	ax.set_xlabel("Time",fontsize=28)
 	ax.set_ylabel(L"$\dfrac{d\langle J_{\rm ac}\rangle}{d\beta}$",fontsize=28)
 	ax.grid(true)
@@ -136,7 +136,7 @@ function plot_adjoint_sens_cum_avg()
 	#lgnd.legendHandles[1]._legmarker.set_markersize(10)
 	#lgnd = fig1.legend(loc=(0.5,0.6),fontsize=28)
 	#lgnd.legendHandles[1]._legmarker.set_markersize(10)
-	plt.xticks(LinRange(0,200000,5))
+	#plt.xticks(LinRange(0,200000,5))
 	#plt.locator_params(axis='x', nbins=6)
 
 	return dJds_arr

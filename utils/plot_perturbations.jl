@@ -2,19 +2,32 @@ include("../examples/rijke.jl")
 using OrdinaryDiffEq
 using DiffEqSensitivity, Zygote
 using JLD
+using Distributed
 #using PyPlot
 using SharedArrays
+function ad_solve(u0, eps, n, v, ind)
+	d = N
+	s = [7.0, 0.2]
+	un = u0 + eps*v
+	un = Rijke_ODE(un, s, n)
+	return un[ind]
+end
+
 function compute_perturbations()
 d = N
 u = rand(d)
 s = [7.0, 0.2]
 nSteps = 3500
+ad_norm = zeros(nSteps)
+	ad = SharedArray{Float64}(d)
+	v = SharedArray{Float64}(d)
+
 v_norm, w_norm, fd_norm = zeros(nSteps), 
 				zeros(nSteps), zeros(nSteps)
 v, w, fd = rand(d), rand(d),
 				rand(d)
 u_trj = zeros(d, nSteps)
-eps = 1.e-3
+eps = 1.e-4
 u_p = u + eps*fd
 for n = 1:nSteps
 	du = dRijke(u, s, 1.e-6)
@@ -35,31 +48,23 @@ for n = nSteps:-1:1
 	w = du*w
 	w_norm[n] = norm(w)
 end
-save("../data/rijke_perturbations/v_w_fd_norms.jld", 
+save("../data/rijke_perturbations/v_w_fd_ad_norms.jld", 
 	 "v_norm", v_norm,
 	 "w_norm", w_norm,
-	 "fd_norm", fd_norm)
-end
-function ad_solve(u0, eps, n, ind)
-	d = N
-	s = [7.0, 0.2]
-	un = u0 + eps*rand(d)
-	un = Rijke_ODE(un, s, n)
-	return un[ind]
+	 "fd_norm", fd_norm,
+	 "ad_norm", ad_norm)
 end
 function compute_ad_pert()
-	nSteps = 3500
+	nSteps = 1
 	d = N
 	u = rand(d)
 	eps = 0.
-	ad_norm = zeros(nSteps)
-	for n = 1:nSteps
+		for n = 1:nSteps
 		@show n
-		ad = SharedArray{Float64}(d)
 		ad .= 0.
+		v .= rand(d)
 		ans = @distributed for j = 1:d
-			ad[j] = Zygote.gradient(
-									eps -> ad_solve(u, eps, n, j), eps)[1]
+			ad[j] = Zygote.gradient(eps -> ad_solve(u, eps, n, v, j), eps)[1]
 		end
 		wait(ans)
 		ad_norm[n] = norm(ad)
@@ -74,16 +79,20 @@ function plot_perturbations()
 	fd_norm = X["fd_norm"]
 	X = load("../data/rijke_perturbations/ad_norms.jld")
 	ad_norm = X["ad_norm"]
-	nSteps = size(v_norm)[1]
+	nSteps = div(size(v_norm)[1],1)
+	v_norm = v_norm[1:nSteps]
+	fd_norm = fd_norm[1:nSteps]
+	w_norm = w_norm[1:nSteps]
+	ad_norm = ad_norm[1:nSteps]
 	fig, ax = subplots(1,1)
-	ax.semilogy(dt*(1:nSteps), v_norm, ".", ms=4.0,
+	ax.semilogy(dt*(1:nSteps), v_norm, "v", ms=4.0,
 				label="tangent")
-	ax.semilogy(dt*(1:nSteps), w_norm, "^", ms=4.0,
+	ax.semilogy(dt*(1:nSteps), w_norm, ".", ms=4.0,
 				label="adjoint")
-	ax.semilogy(dt*(1:nSteps), fd_norm, "P", ms=4.0,
+	ax.semilogy(dt*(1:nSteps), fd_norm, "^", ms=4.0,
 				label="FD")
-	ax.semilogy(dt*(1:nSteps), fd_norm, "1", ms=10.0,
-				label="AD")
+	#ax.semilogy(dt*(1:nSteps), ad_norm, "1", ms=5.0,
+	#			label="AD")
 
 	ax.xaxis.set_tick_params(labelsize=28)
 	ax.yaxis.set_tick_params(labelsize=28)
