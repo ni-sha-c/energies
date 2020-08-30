@@ -12,14 +12,22 @@ function ad_solve(u0, eps, n, v, ind)
 	un = Rijke_ODE(un, s, n)
 	return un[ind]
 end
+function ad_adj_solve(u0, n, v)
+	d = N
+	s = [7.0, 0.2]
+	un = Rijke_ODE(u0, s, n)
+	return dot(un, v)
+end
 
 function compute_perturbations()
 d = N
 u = rand(d)
 s = [7.0, 0.2]
-nSteps = 1000
+nSteps = 2500
 ad_norm = zeros(nSteps)
+ad_adj_norm = zeros(nSteps)
 ad = SharedArray{Float64}(d)
+ad_adj = SharedArray{Float64}(d)
 eps_ad = 0.
 v_norm, w_norm, fd_norm = zeros(nSteps), 
 				zeros(nSteps), zeros(nSteps)
@@ -51,16 +59,22 @@ for n = 1:nSteps
 end
 for n = nSteps:-1:1
 	u = u_trj[:,n]
+	ans = @distributed for j = 1:d
+		ad_adj[j] = Zygote.gradient(u -> ad_adj_solve(u, 1, w), u)[1]
+	end
+	wait(ans)
+	ad_adj_norm[n] = norm(ad_adj)
 	du = dRijke(u, s, 1.e-6)
 	du = du'
 	w = du*w
 	w_norm[n] = norm(w)
 end
-save("../data/rijke_perturbations/v_w_fd_ad_norms.jld", 
+save("../data/rijke_perturbations/v_w_fd_ada_norms.jld", 
 	 "v_norm", v_norm,
 	 "w_norm", w_norm,
 	 "fd_norm", fd_norm,
-	 "ad_norm", ad_norm)
+	 "ad_norm", ad_norm, 
+	 "ad_adj_norm", ad_adj_norm)
 end
 function plot_perturbations()
 	X = load("../data/rijke_perturbations/v_w_fd_ad_norms.jld")
