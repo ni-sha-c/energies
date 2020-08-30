@@ -74,12 +74,13 @@ save("../data/rijke_perturbations/v_w_fd_ada_norms.jld",
 	 "ad_adj_norm", ad_adj_norm)
 end
 function plot_perturbations()
-	X = load("../data/rijke_perturbations/v_w_fd_ad_norms.jld")
+	X = load("../data/rijke_perturbations/v_w_fd_ada_norms.jld")
 	v_norm = X["v_norm"]
 	w_norm = X["w_norm"]
 	fd_norm = X["fd_norm"]
 	#X = load("../data/rijke_perturbations/ad_norms.jld")
 	ad_norm = X["ad_norm"]
+	ad_adj_norm = X["ad_adj_norm"]
 	nSteps = div(size(v_norm)[1],1)
 	v_norm = v_norm[1:nSteps]
 	fd_norm = fd_norm[1:nSteps]
@@ -93,7 +94,9 @@ function plot_perturbations()
 	ax.semilogy(dt*(1:nSteps), fd_norm, "1", ms=4.0,
 				label="FD")
 	ax.semilogy(dt*(1:nSteps), ad_norm, "^", ms=4.0,
-				label="AD")
+				label="forward AD")
+	ax.semilogy(dt*(1:nSteps), ad_adj_norm, "P", ms=4.0,
+				label="reverse AD")
 
 	ax.xaxis.set_tick_params(labelsize=28)
 	ax.yaxis.set_tick_params(labelsize=28)
