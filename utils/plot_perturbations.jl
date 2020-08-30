@@ -89,13 +89,13 @@ function plot_perturbations()
 	w_norm = w_norm[1:nSteps]
 	ad_norm = ad_norm[1:nSteps]
 	fig, ax = subplots(1,1)
-	ax.semilogy(dt*(1:nSteps), v_norm, "v", ms=4.0,
+	ax.semilogy(dt*(1:nSteps), v_norm, "v", ms=10.0,
 				label="tangent")
 	ax.semilogy(dt*(1:nSteps), w_norm, ".", ms=4.0,
 				label="adjoint")
-	ax.semilogy(dt*(1:nSteps), fd_norm, "^", ms=4.0,
+	ax.semilogy(dt*(1:nSteps), fd_norm, "1", ms=4.0,
 				label="FD")
-	ax.semilogy(dt*(1:nSteps), ad_norm, "1", ms=5.0,
+	ax.semilogy(dt*(1:nSteps), ad_norm, "^", ms=4.0,
 				label="AD")
 
 	ax.xaxis.set_tick_params(labelsize=28)
