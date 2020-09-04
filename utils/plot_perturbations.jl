@@ -27,7 +27,7 @@ nSteps = 2500
 ad_norm = zeros(nSteps)
 ad_adj_norm = zeros(nSteps)
 ad = SharedArray{Float64}(d)
-ad_adj = SharedArray{Float64}(d)
+ad_adj = zeros(d)
 eps_ad = 0.
 v_norm, w_norm, fd_norm = zeros(nSteps), 
 				zeros(nSteps), zeros(nSteps)
@@ -59,10 +59,7 @@ for n = 1:nSteps
 end
 for n = nSteps:-1:1
 	u = u_trj[:,n]
-	ans = @distributed for j = 1:d
-		ad_adj[j] = Zygote.gradient(u -> ad_adj_solve(u, 1, w), u)[1]
-	end
-	wait(ans)
+	ad_adj .= Zygote.gradient(u -> ad_adj_solve(u, 1, w), u)[1]
 	ad_adj_norm[n] = norm(ad_adj)
 	du = dRijke(u, s, 1.e-6)
 	du = du'
