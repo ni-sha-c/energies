@@ -157,6 +157,7 @@ function plot_acoustic_energy_colored()
     ax.xaxis.set_tick_params(labelsize=28)
     ax.yaxis.set_tick_params(labelsize=28)
     ax.set_xlabel(L"$\beta$",fontsize=28)
-    ax.set_ylabel(L"$<J_{\rm ac}>$",fontsize=28)
+    ax.set_ylabel(L"$\langle J_{\rm ac}\rangle$",rotation=0,
+				  fontsize=28)
 	ax.grid(true)
 end

@@ -84,15 +84,16 @@ function plot_perturbations()
 	#X = load("../data/rijke_perturbations/ad_norms.jld")
 	ad_norm = X["ad_norm"]
 	ad_adj_norm = X["ad_adj_norm"]
+	@show maximum(ad_adj_norm), maximum(w_norm)
 	nSteps = div(size(v_norm)[1],1)
 	v_norm = v_norm[1:nSteps]
 	fd_norm = fd_norm[1:nSteps]
 	w_norm = w_norm[1:nSteps]
 	ad_norm = ad_norm[1:nSteps]
 	fig, ax = subplots(1,1)
-	ax.semilogy(dt*(1:nSteps), v_norm, "v", ms=10.0,
+	ax.semilogy(dt*(1:nSteps), v_norm, "v", ms=15.0,
 				label="tangent")
-	ax.semilogy(dt*(1:nSteps), w_norm, ".", ms=4.0,
+	ax.semilogy(dt*(1:nSteps), w_norm, ".", ms=20.0,
 				label="adjoint")
 	ax.semilogy(dt*(1:nSteps), fd_norm, "1", ms=4.0,
 				label="FD")
@@ -112,6 +113,7 @@ function plot_perturbations()
 	lgnd.legendHandles[2]._legmarker.set_markersize(20)
 	lgnd.legendHandles[3]._legmarker.set_markersize(20)
 	lgnd.legendHandles[4]._legmarker.set_markersize(20)
+	lgnd.legendHandles[5]._legmarker.set_markersize(20)
 end
 
 

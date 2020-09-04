@@ -58,21 +58,22 @@ function plot_optimization_path()
 
 
 		fig, ax = subplots(1,1)
-		ax.xaxis.set_tick_params(labelsize=25)
-		ax.yaxis.set_tick_params(labelsize=25)
+		ax.xaxis.set_tick_params(labelsize=36)
+		ax.yaxis.set_tick_params(labelsize=36)
 	
-		ax.plot(s1, J1, "r.",ms=3.0)
-		ax.plot(s2, J2, "r.",ms=3.0)
-		ax.plot(s3, J3, "r.",ms=3.0)
-		ax.plot(s4, J4, "r.",ms=3.0)
+		ax.plot(s1, J1, "r.",ms=6.0)
+		ax.plot(s2, J2, "r.",ms=6.0)
+		ax.plot(s3, J3, "r.",ms=6.0)
+		ax.plot(s4, J4, "r.",ms=6.0)
 		
-		ax.plot(beta[1:6], Eac[1:6], "bx", ms=8.0)
-		ax.plot(beta1[1:6], Eac1[1:6], "gx", ms=8.0)
-
+		ax.plot(beta[1:6], Eac[1:6], "bP", ms=8.0)
+		#ax.plot(beta1[1:6], Eac1[1:6], "kP", ms=8.0)
+		ax.plot(6.5, 23.1, "bP", ms=8.0)
 		
 		ax.grid(true)
-		ax.set_xlabel(L"$\beta$", fontsize=25)
-		ax.set_ylabel("acoustic energy", fontsize=25)
+		ax.set_xlabel(L"$\beta$", fontsize=36)
+		ax.set_ylabel(L"$\langle J_{\rm ac}\rangle$", 
+					  rotation=0,fontsize=36)
 
 
 		ll = 6.0
@@ -92,16 +93,18 @@ function plot_optimization_path()
 
 
 		ax_in = fig.add_axes([0.3, 0.5, 0.3, 0.35])
-		ax_in.plot(s1, J1, "r.",ms=3.0)
-		ax_in.plot(s2, J2, "r.",ms=3.0)
-		ax_in.plot(s3, J3, "r.",ms=3.0)
-		ax_in.plot(s4, J4, "r.",ms=3.0)
-		ax_in.plot(beta[3:5], Eac[3:5], "bx", ms=8.0)
-		ax_in.plot(beta1[1], Eac1[1], "gx", ms=8.0)
+		ax_in.plot(s1, J1, "r.",ms=6.0)
+		ax_in.plot(s2, J2, "r.",ms=6.0)
+		ax_in.plot(s3, J3, "r.",ms=6.0)
+		ax_in.plot(s4, J4, "r.",ms=6.0)
+		ax_in.plot(beta[3:5], Eac[3:5], "bP", ms=8.0)
+		ax_in.plot(beta[1], Eac[1], "bP", ms=8.0)
+		#ax_in.plot(beta1[1], Eac1[1], "kP", ms=8.0)
+		ax_in.plot(6.5, 23.1, "bP", ms=8.0)
 
 	
 		ax_in.grid(true)
-		ax_in.xaxis.set_tick_params(labelsize=18)
-		ax_in.yaxis.set_tick_params(labelsize=18)
-
+		ax_in.xaxis.set_tick_params(labelsize=36)
+		ax_in.yaxis.set_tick_params(labelsize=36)
+		@show beta1
 end
