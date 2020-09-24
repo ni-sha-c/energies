@@ -18,7 +18,7 @@ function plot_attractor(beta)
 		qdot[k] = beta*u[tNg]
 		u0 .= u
 	end
-	save(string("attractor_beta", beta, "_.jld"), 
+	save(string("../data/attractor/ufqdot_beta", beta, "_.jld"), 
 		 "uf", uf, "qdot", qdot) 
 	fig = figure(figsize=(10,5))
 	ax.plot(qdot, uf, "b.", ms=0.2)
