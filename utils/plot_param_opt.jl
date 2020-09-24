@@ -23,11 +23,11 @@ function plot_optimization_path()
 		#dJds1 = Y["dJds_path"]
 		#beta1_path = Y["beta_path"]
 
-		X = load("../data/optimization/Eac_along_path.jld")
+		X = load("../data/optimization/Eac_along_path_05.jld")
 		beta = X["beta"]
-		beta1 = X["beta1"]
+		#beta1 = X["beta1"]
 		Eac = X["Eac"]
-		Eac1 = X["Eac1"]
+		#Eac1 = X["Eac1"]
 
 		X = load("../data/attractor/more_les/Eac.jld")
 		Y = load("../data/attractor/more_les/Eac1.jld")
@@ -66,9 +66,9 @@ function plot_optimization_path()
 		ax.plot(s3, J3, "r.",ms=6.0)
 		ax.plot(s4, J4, "r.",ms=6.0)
 		
-		ax.plot(beta[1:6], Eac[1:6], "bP", ms=8.0)
+		ax.plot(beta[1:10], Eac[1:10], "bP", ms=8.0)
 		#ax.plot(beta1[1:6], Eac1[1:6], "kP", ms=8.0)
-		ax.plot(6.5, 23.1, "bP", ms=8.0)
+		#ax.plot(6.5, 23.1, "bP", ms=8.0)
 		
 		ax.grid(true)
 		ax.set_xlabel(L"$\beta$", fontsize=36)
@@ -97,14 +97,14 @@ function plot_optimization_path()
 		ax_in.plot(s2, J2, "r.",ms=6.0)
 		ax_in.plot(s3, J3, "r.",ms=6.0)
 		ax_in.plot(s4, J4, "r.",ms=6.0)
-		ax_in.plot(beta[3:5], Eac[3:5], "bP", ms=8.0)
-		ax_in.plot(beta[1], Eac[1], "bP", ms=8.0)
+		ax_in.plot(beta[1:5], Eac[1:5], "bP", ms=8.0)
+		#ax_in.plot(beta[1], Eac[1], "bP", ms=8.0)
 		#ax_in.plot(beta1[1], Eac1[1], "kP", ms=8.0)
-		ax_in.plot(6.5, 23.1, "bP", ms=8.0)
+		#ax_in.plot(6.5, 23.1, "bP", ms=8.0)
 
 	
 		ax_in.grid(true)
 		ax_in.xaxis.set_tick_params(labelsize=36)
 		ax_in.yaxis.set_tick_params(labelsize=36)
-		@show beta1
+		@show beta
 end
