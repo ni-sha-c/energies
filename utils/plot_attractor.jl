@@ -20,11 +20,12 @@ function plot_attractor(beta)
 	end
 	save(string("../data/attractor/ufqdot_beta", beta, "_.jld"), 
 		 "uf", uf, "qdot", qdot) 
-	fig = figure(figsize=(10,5))
+	fig = figure(figsize=(10,6))
+	ax = fig.add_subplot(111)
 	ax.plot(qdot, uf, "b.", ms=0.2)
-	ax.set_xlabel(L"\dot{q}",fontsize=40)
-	ax.set_ylabel(L"u_f",fontsize=40)
-	ax.xaxis.set_tick_params(labelsize=40)
-	ax.yaxis.set_tick_params(labelsize=40)
-	ax.set_title(L"\$\beta = $(beta), \tau = 0.2\$", fontsize=40)
+	ax.set_xlabel(L"\dot{q}",fontsize=46)
+	ax.set_ylabel(L"u_f",fontsize=46)
+	ax.xaxis.set_tick_params(labelsize=46)
+	ax.yaxis.set_tick_params(labelsize=46)
+	ax.set_title("\$\\beta = $(beta) \$", fontsize=46)
 end
